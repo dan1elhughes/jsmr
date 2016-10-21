@@ -1,5 +1,6 @@
 const server = require('http').createServer();
 const network = require('socket.io').listen(server);
+const console = require('util');
 const sendComponents = require('./sendComponents');
 
 const words = require('./wordcount/load')();

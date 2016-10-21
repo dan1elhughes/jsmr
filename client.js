@@ -4,6 +4,7 @@ const socket = network.connect('http://localhost:3000', {
 });
 const os = require('os');
 const vm = require('vm');
+const console = require('util');
 
 socket.on('disconnect', () => console.log('Disconnected'));
 socket.on('connect', () => console.log('Connected'));
