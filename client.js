@@ -1,5 +1,5 @@
-const io = require('socket.io-client');
-const socket = io.connect('http://localhost:3000', {
+const network = require('socket.io-client');
+const socket = network.connect('http://localhost:3000', {
 	reconnect: true
 });
 const os = require('os');
@@ -12,10 +12,17 @@ socket.emit('ready', {
 	hostname: os.hostname()
 });
 
-socket.on('something', function (map) {
-	var sandbox = {};
-	var context = vm.createContext(sandbox);
-	vm.runInContext(`(${map}())`, context);
-	socket.emit('result', context);
-	console.log(context);
+let components = {};
+
+socket.on('data', incoming => components.data = incoming);
+socket.on('process', incoming => components.process = `((${incoming})())`);
+
+socket.on('doWork', () => {
+	let context = vm.createContext({
+		console,
+		data: components.data,
+		emit: data => socket.emit('result', data)
+	});
+
+	vm.runInContext(components.process, context);
 });
