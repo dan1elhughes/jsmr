@@ -1,0 +1,19 @@
+{
+  "name": "fyp",
+  "version": "0.0.1",
+  "description": "Final year project",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dan1elhughes/fyp.git"
+  },
+  "author": "Dan Hughes",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dan1elhughes/fyp/issues"
+  },
+  "homepage": "https://github.com/dan1elhughes/fyp#readme",
+  "dependencies": {
+    "socket.io": "^1.5.0",
+    "socket.io-client": "^1.5.0"
+  }
+}
