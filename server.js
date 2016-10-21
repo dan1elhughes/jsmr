@@ -1,7 +1,7 @@
 const server = require('http').createServer();
-const io = require('socket.io').listen(server);
+const network = require('socket.io').listen(server);
 
-io.on('connection', socket => {
+network.on('connection', socket => {
 
 	socket.on('ready', machine => {
 		console.log(`CONNECT: ${socket.id} (${machine.hostname})`);
@@ -10,12 +10,20 @@ io.on('connection', socket => {
 	socket.on('disconnect', () => {
 		console.log(`DISCONN: ${socket.id}`);
 	});
+
+	socket.on('result', console.log);
 });
 
-setInterval(() => {
-	io.emit('something', 'Event to all clients');
+var map = function () {
+	this.result = 'some result';
+};
 
-	io.clients((error, clients) => {
+var payload = map.toString();
+
+setInterval(() => {
+	network.emit('something', payload);
+
+	network.clients((error, clients) => {
 		if (error) throw error;
 		console.log(clients);
 	});
