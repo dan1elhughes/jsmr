@@ -4,6 +4,8 @@ const os = require('os');
 const vm = require('vm');
 const console = require('util');
 
+let components = {};
+
 const execute = process => () => {
 	let context = vm.createContext({
 		console,
@@ -24,17 +26,10 @@ socket.emit('ready', {
 	hostname: os.hostname()
 });
 
-let components = {};
-
 socket.on('data', incoming => components.data = incoming);
-socket.on('process', incoming => components.process = `((${incoming})())`);
 
-socket.on('doWork', () => {
-	let context = vm.createContext({
-		console,
-		data: components.data,
-		emit: data => socket.emit('result', data)
-	});
+socket.on('map', incoming => components.map = `((${incoming})())`);
+socket.on('exec-map', execute('map'));
 
-	vm.runInContext(components.process, context);
-});
+socket.on('reduce', incoming => components.reduce = `((${incoming})())`);
+socket.on('exec-reduce', execute('reduce'));
