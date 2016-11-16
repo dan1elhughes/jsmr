@@ -8,7 +8,7 @@ module.exports = {
 			.toLowerCase()
 		),
 
-	map: word => emit({ key: word, value: 1 }),
+	map: word => ({ key: word, value: 1 }),
 
 	shuffle: (a, b) => a.key === b.key,
 
