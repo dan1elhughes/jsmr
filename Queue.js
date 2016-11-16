@@ -8,7 +8,14 @@ module.exports = function (data) {
 		let results = [];
 
 		while (count --> 0) {
-			results.push(this.queue.shift());
+			let value = this.queue.shift();
+
+			if (value) {
+				results.push(value);
+			} else if (this.queue.length === 0) {
+				results.push(null);
+				count = 0;
+			}
 		}
 
 		return results;
