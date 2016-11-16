@@ -1,46 +1,23 @@
 const server = require('http').createServer();
 const network = require('socket.io').listen(server);
 const console = require('util');
-const sendComponents = require('./sendComponents');
+const sendComponent = require('./sendComponent');
+const app = require('./wordcount/app');
+const Queue = require('./Queue');
 
-const words = require('./wordcount/load')();
+const queue = new Queue(app.partition(app.load()));
 
 network.on('connection', socket => {
 
-	socket.on('ready', machine => {
-		console.log(`READY: ${socket.id} (${machine.hostname})`);
+	console.log(`CONN: ${socket.id}`);
 
-		sendComponents(socket, {
-			data: words,
-			process: function () {
-				console.log(this.data);
-				this.data.forEach(sentence => {
-					let words = sentence.split(' ').filter(Boolean);
-					if (words.length) {
-						emit(words.length);
-					}
-				});
-			}
-		}).then(function () {
-			console.log('done');
-		});
-	});
+	socket.on('get-fn', sendComponent('fn', app.map));
+	socket.on('get-data', sendComponent('data', queue));
 
-	socket.on('disconnect', () => {
-		console.log(`DISCONN: ${socket.id}`);
-	});
+	socket.on('disconnect', () => console.log(`DISCONN: ${socket.id}`));
 
-	socket.on('result', result => console.log(`RESULT:  ${result}`));
+	socket.on('result', result => console.log(`RESULT: ${JSON.stringify(result)}`));
 });
-
-setInterval(() => {
-	network.clients((error, clients) => {
-		if (error) throw error;
-		console.log(clients);
-	});
-
-	network.emit('doWork');
-}, 3000);
 
 server.on('listening', () => console.log('Listening'));
 server.listen(3000);

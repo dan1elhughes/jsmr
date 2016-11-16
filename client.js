@@ -1,35 +1,56 @@
 const network = require('socket.io-client');
 const socket = network.connect('http://localhost:3000', { reconnect: true });
-const os = require('os');
 const vm = require('vm');
 const console = require('util');
 
-let components = {};
+let components = {
+	DONE: false
+};
+
+let store = key => value => {
+	console.log(`Got ${key}: `, value);
+	components[key] = value;
+
+	if (components.data && components.fn && !components.DONE) {
+		execute('fn')();
+	}
+};
 
 const execute = process => () => {
-	let context = vm.createContext({
-		console,
-		data: components.data,
-		emit: data => socket.emit(`result-${process}`, data)
-	});
+	console.log(`EXEC: ${process}`);
 
-	let result = vm.runInContext(components[process], context);
-	if (result) {
-		socket.emit(`result-${process}`, result);
+	let runAndTransmit = data => {
+
+		if (data !== null) {
+			let context = vm.createContext({
+				console,
+				data,
+				emit: data => socket.emit(`result`, data)
+			});
+
+			let result = vm.runInContext(`((${components[process]})(data))`, context);
+
+			if (result) {
+				socket.emit(`result`, result);
+			}
+		} else {
+			components.DONE = true;
+		}
+	};
+
+	components.data.forEach(runAndTransmit);
+
+	if (!components.DONE) {
+		socket.emit(`get-data`, 3, store('data'));
 	}
 };
 
 socket.on('disconnect', () => console.log('Disconnected'));
-socket.on('connect', () => console.log('Connected'));
 
-socket.emit('ready', {
-	hostname: os.hostname()
+socket.on('connect', () => {
+	console.log('Connected');
+
+	store('data')(null);
+	socket.emit('get-data', 1, store('data'));
+	socket.emit('get-fn', null, store('fn'));
 });
-
-socket.on('data', incoming => components.data = incoming);
-
-socket.on('map', incoming => components.map = `((${incoming})())`);
-socket.on('exec-map', execute('map'));
-
-socket.on('reduce', incoming => components.reduce = `((${incoming})())`);
-socket.on('exec-reduce', execute('reduce'));
