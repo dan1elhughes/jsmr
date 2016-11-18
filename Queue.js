@@ -1,7 +1,7 @@
 module.exports = function (data) {
-	this.queue = data.slice() || [];
+	this.queue = data ? data.slice() : [];
 
-	this.push = this.queue.push;
+	this.push = this.queue.push.bind(this.queue);
 
 	this.pop = count => {
 		count = count || 1;
