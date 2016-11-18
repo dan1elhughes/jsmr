@@ -6,6 +6,10 @@
     "type": "git",
     "url": "git+https://github.com/dan1elhughes/fyp.git"
   },
+  "scripts": {
+    "controller": "nodemon controller.js",
+    "worker": "nodemon worker.js"
+  },
   "author": "Dan Hughes",
   "license": "ISC",
   "bugs": {
@@ -15,5 +19,8 @@
   "dependencies": {
     "socket.io": "^1.5.0",
     "socket.io-client": "^1.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
   }
 }
