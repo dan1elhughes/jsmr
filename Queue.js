@@ -3,6 +3,8 @@ module.exports = function (data) {
 
 	this.push = this.queue.push.bind(this.queue);
 
+	this.length = () => this.queue.length;
+
 	this.pop = count => {
 		count = count || 1;
 		let results = [];
