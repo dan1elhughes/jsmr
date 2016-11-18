@@ -12,8 +12,10 @@ network.on('connection', socket => {
 
 	console.log(`CONN: ${socket.id}`);
 
-	socket.on('get-fn', sendComponent('fn', app.map));
-	socket.on('get-data', sendComponent('data', toMap));
+	socket.on('get-chunk', sendComponent('chunk', {
+		fn: app.map,
+		data: toMap
+	}));
 
 	socket.on('disconnect', () => console.log(`DSCN: ${socket.id}`));
 

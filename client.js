@@ -12,11 +12,13 @@ let resetComponents = () => {
 	};
 };
 
-let store = key => value => {
-	console.log(`STOR: ${JSON.stringify(value)} (${key}) `);
-	components[key] = value;
+let store = value => {
+	console.log(`STOR: ${JSON.stringify(value)}`);
 
-	if (components.data && components.fn && !components.DONE) {
+	components.fn = value.fn;
+	components.data = value.data;
+
+	if (components.data && components.fn) {
 		execute();
 	}
 };
@@ -41,7 +43,7 @@ let execute = () => {
 	});
 
 	if (!components.DONE) {
-		socket.emit(`get-data`, components.CHUNKSIZE++, store('data'));
+		socket.emit(`get-chunk`, components.CHUNKSIZE++, store);
 	}
 };
 
@@ -52,6 +54,5 @@ socket.on('connect', () => {
 
 	resetComponents();
 
-	socket.emit('get-data', components.CHUNKSIZE++, store('data'));
-	socket.emit('get-fn', null, store('fn'));
+	socket.emit('get-chunk', components.CHUNKSIZE++, store);
 });

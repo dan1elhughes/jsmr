@@ -1,12 +1,9 @@
 const console = require('util');
 
 module.exports = (name, component) => (quantity, respond) => {
-	if (component instanceof Function) {
-		component = component.toString();
-	}
-
-	let data = name === 'data' ? component.pop(quantity) : component;
-
 	console.log(`SEND: ${name}`);
-	respond(data);
+	respond({
+		fn: component.fn.toString(),
+		data: component.data.pop(quantity)
+	});
 };
