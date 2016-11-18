@@ -6,6 +6,7 @@ const app = require('./wordcount/app');
 const Queue = require('./Queue');
 
 const queue = new Queue(app.partition(app.load()));
+const mapped = new Queue();
 
 network.on('connection', socket => {
 
@@ -16,7 +17,7 @@ network.on('connection', socket => {
 
 	socket.on('disconnect', () => console.log(`DISCONN: ${socket.id}`));
 
-	socket.on('result', result => console.log(`RESULT: ${JSON.stringify(result)}`));
+	socket.on('result', mapped.push);
 });
 
 server.on('listening', () => console.log('Listening'));
