@@ -21,7 +21,7 @@ let store = key => value => {
 	}
 };
 
-const execute = () => {
+let execute = () => {
 	components.data.forEach(data => {
 		if (data !== null) {
 			let context = vm.createContext({
