@@ -5,15 +5,15 @@ const sendComponent = require('./sendComponent');
 const app = require('./wordcount/app');
 const Queue = require('./Queue');
 
-const queue = new Queue(app.partition(app.load()));
-const mapped = new Queue();
+let toMap = new Queue(app.partition(app.load()));
+let mapped = new Queue();
 
 network.on('connection', socket => {
 
 	console.log(`CONN: ${socket.id}`);
 
 	socket.on('get-fn', sendComponent('fn', app.map));
-	socket.on('get-data', sendComponent('data', queue));
+	socket.on('get-data', sendComponent('data', toMap));
 
 	socket.on('disconnect', () => console.log(`DISCONN: ${socket.id}`));
 
