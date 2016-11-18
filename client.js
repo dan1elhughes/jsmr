@@ -13,7 +13,7 @@ let resetComponents = () => {
 };
 
 let store = key => value => {
-	console.log(`STORE ${key}: `, value);
+	console.log(`STOR: ${JSON.stringify(value)} (${key}) `);
 	components[key] = value;
 
 	if (components.data && components.fn && !components.DONE) {
@@ -29,6 +29,7 @@ let execute = () => {
 				data
 			});
 
+			console.log(`PROC: ${data}`);
 			let result = vm.runInContext(`((${components.fn})(data))`, context);
 
 			if (typeof result !== 'undefined') {
@@ -44,10 +45,10 @@ let execute = () => {
 	}
 };
 
-socket.on('disconnect', () => console.log('Disconnected'));
+socket.on('disconnect', () => console.log('DISC: Disconnected'));
 
 socket.on('connect', () => {
-	console.log('Connected');
+	console.log('CONN: Connected');
 
 	resetComponents();
 

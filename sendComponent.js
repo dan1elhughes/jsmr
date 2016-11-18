@@ -7,6 +7,6 @@ module.exports = (name, component) => (quantity, respond) => {
 
 	let data = name === 'data' ? component.pop(quantity) : component;
 
-	console.log(`Sending ${name}`);
+	console.log(`SEND: ${name}`);
 	respond(data);
 };

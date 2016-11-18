@@ -15,9 +15,12 @@ network.on('connection', socket => {
 	socket.on('get-fn', sendComponent('fn', app.map));
 	socket.on('get-data', sendComponent('data', toMap));
 
-	socket.on('disconnect', () => console.log(`DISCONN: ${socket.id}`));
+	socket.on('disconnect', () => console.log(`DSCN: ${socket.id}`));
 
-	socket.on('result', mapped.push);
+	socket.on('result', result => {
+		mapped.push(result);
+		console.log(`RSLT: ${JSON.stringify(result)}`);
+	});
 });
 
 server.on('listening', () => console.log('Listening'));
