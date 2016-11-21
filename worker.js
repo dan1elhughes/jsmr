@@ -19,32 +19,54 @@ let store = value => {
 
 	console.log(`STOR: ${JSON.stringify(value)}`);
 
-	components.fn = value.fn;
+	components.action = value.action;
 	components.data = value.data;
+	components.fn = value.fn;
 
-	if (components.data && components.fn) {
+	if (components.data && components.fn && components.action !== 'done') {
 		execute();
 	}
 };
 
 let execute = () => {
-	components.data.forEach(data => {
+
+	let process = data => {
 		if (data !== null) {
 			let context = vm.createContext({
 				console,
 				data
 			});
 
-			console.log(`PROC: ${data}`);
+			console.log(`PROC: ${JSON.stringify(data)}`);
 			let result = vm.runInContext(`((${components.fn})(data))`, context);
 
 			if (typeof result !== 'undefined') {
-				socket.emit(`result`, result);
+
+				let content = {
+					action: components.action
+				};
+
+				if (components.action === 'reduce') {
+					content.result = {
+						key: components.data[0].key,
+						value: result
+					};
+				} else {
+					content.result = result;
+				}
+
+				socket.emit(`result`, content);
 			}
 		} else {
 			components.DONE = true;
 		}
-	});
+	};
+
+	if (components.action === 'map') {
+		components.data.forEach(process);
+	} else {
+		process(components.data);
+	}
 
 	if (!components.DONE) {
 		socket.emit(`get-chunk`, components.CHUNKSIZE++, store);
