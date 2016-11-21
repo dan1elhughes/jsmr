@@ -13,6 +13,10 @@ let resetComponents = () => {
 };
 
 let store = value => {
+	if (value.fn) {
+		value.fn = value.fn.replace(/\s\s+/g, ' ');
+	}
+
 	console.log(`STOR: ${JSON.stringify(value)}`);
 
 	components.fn = value.fn;
