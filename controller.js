@@ -5,23 +5,31 @@ const sendComponent = require('./sendComponent');
 const app = require('./wordcount/app');
 const Queue = require('./Queue');
 
-let toMap = new Queue(app.partition(app.load()));
-let mapped = new Queue();
+let mapQueue = new Queue(app.partition(app.load()));
+let reduceQueue = new Queue();
 
 network.on('connection', socket => {
 
 	console.log(`CONN: ${socket.id}`);
 
 	socket.on('get-chunk', sendComponent('chunk', {
-		fn: app.map,
-		data: toMap
+		map: app.map,
+		reduce: app.reduce,
+		mapQueue,
+		reduceQueue
 	}));
 
 	socket.on('disconnect', () => console.log(`DSCN: ${socket.id}`));
 
-	socket.on('result', result => {
-		mapped.push(result);
-		console.log(`RSLT: ${JSON.stringify(result)}`);
+	socket.on('result', data => {
+		if (data.action === 'map') {
+			reduceQueue.push(data.result);
+			console.log(`MAPR: ${JSON.stringify(data)}`);
+		} else if (data.action === 'reduce') {
+			console.log(`RDCE: ${JSON.stringify(data)}`);
+		} else {
+			console.log(`????: ${JSON.stringify(data)}`);
+		}
 	});
 });
 
