@@ -1,9 +1,13 @@
+const server = require('http').createServer();
+const io = require('socket.io')(server);
 const network = require('socket.io-client');
 const socket = network.connect('http://localhost:3000', { reconnect: true });
 const vm = require('vm');
 const console = require('util');
 
 let components = {};
+
+let memory = {};
 
 let resetComponents = () => {
 	components = {
@@ -55,7 +59,12 @@ let execute = () => {
 					content.result = result;
 				}
 
-				socket.emit(`result`, content);
+				let memKey = `${components.action}/${content.result.key}`;
+
+				memory[memKey] = content.result;
+
+				socket.emit('p2p-haveKey', memKey);
+				// socket.emit(`result`, content);
 			}
 		} else {
 			components.DONE = true;
@@ -77,8 +86,13 @@ socket.on('disconnect', () => console.log('DISC: Disconnected'));
 
 socket.on('connect', () => {
 	console.log('CONN: Connected');
+	server.listen();
 
 	resetComponents();
 
 	socket.emit('get-chunk', components.CHUNKSIZE++, store);
+});
+
+server.on('listening', () => {
+	socket.emit('p2p-register', server.address());
 });
