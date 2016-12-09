@@ -1,96 +1,98 @@
 const server = require('http').createServer();
-const io = require('socket.io')(server);
+const p2p = require('socket.io').listen(server);
 const network = require('socket.io-client');
 const socket = network.connect('http://localhost:3000', { reconnect: true });
 const vm = require('vm');
 const console = require('util');
 
-let components = {};
+let memory = [];
+let resetMemory = () => memory = [];
 
-let memory = {};
-
-let resetComponents = () => {
-	components = {
-		DONE: false,
-		CHUNKSIZE: 1
-	};
-};
+let CHUNKSIZE = 1;
+let resetScaling = () => CHUNKSIZE = 1;
+let increaseScaling = () => CHUNKSIZE++;
 
 let store = value => {
-	if (value.fn) {
-		value.fn = value.fn.replace(/\s\s+/g, ' ');
-	}
-
 	console.log(`STOR: ${JSON.stringify(value)}`);
 
-	components.action = value.action;
-	components.data = value.data;
-	components.fn = value.fn;
+	let components = {
+		action: value.action,
+		data: value.data,
+		fn: value.fn ? value.fn.replace(/\s\s+/g, ' ') : undefined,
+	};
 
-	if (components.data && components.fn && components.action !== 'done') {
-		execute();
+	if (components.data && components.fn && !(['done', 'find'].includes(components.action))) {
+		execute({
+			action: components.action,
+			data: components.data,
+			fn: components.fn,
+		});
 	}
 };
 
-let execute = () => {
+let execute = components => {
+
+	let { action, data, fn } = components;
 
 	let process = data => {
-		if (data !== null) {
-			let context = vm.createContext({
-				console,
-				data
+		let context = vm.createContext({
+			console,
+			data
+		});
+
+		console.log(`PROC: ${JSON.stringify(data)}`);
+		let result = vm.runInContext(`((${fn})(data))`, context);
+
+		if (typeof result !== 'undefined') {
+
+			let content = {
+				action: action
+			};
+
+			if (action === 'reduce') {
+				content.result = {
+					key: data[0].key,
+					value: result
+				};
+			} else {
+				content.result = result;
+			}
+
+			let memKey = `${action}/${content.result.key}`;
+
+			memory.push({
+				k: memKey,
+				v: content.result
 			});
 
-			console.log(`PROC: ${JSON.stringify(data)}`);
-			let result = vm.runInContext(`((${components.fn})(data))`, context);
-
-			if (typeof result !== 'undefined') {
-
-				let content = {
-					action: components.action
-				};
-
-				if (components.action === 'reduce') {
-					content.result = {
-						key: components.data[0].key,
-						value: result
-					};
-				} else {
-					content.result = result;
-				}
-
-				let memKey = `${components.action}/${content.result.key}`;
-
-				memory[memKey] = content.result;
-
-				socket.emit('p2p-haveKey', memKey);
-				// socket.emit(`result`, content);
-			}
-		} else {
-			components.DONE = true;
 		}
 	};
 
-	if (components.action === 'map') {
-		components.data.forEach(process);
+	if (action === 'map') {
+		data.forEach(process);
 	} else {
-		process(components.data);
+		process(data);
 	}
 
-	if (!components.DONE) {
-		socket.emit(`get-chunk`, components.CHUNKSIZE++, store);
-	}
+	socket.emit(`get-chunk`, increaseScaling(), store);
 };
 
-socket.on('disconnect', () => console.log('DISC: Disconnected'));
+socket.on('disconnect', () => {
+	resetMemory();
+	resetScaling();
+	console.log('DISC: Disconnected');
+});
 
 socket.on('connect', () => {
 	console.log('CONN: Connected');
 	server.listen(0, '127.0.0.1');
 
-	resetComponents();
+	resetMemory();
+	resetScaling();
 
-	socket.emit('get-chunk', components.CHUNKSIZE++, store);
+	socket.emit('get-chunk', increaseScaling(), store);
+});
+
 });
 
 server.on('listening', () => {
