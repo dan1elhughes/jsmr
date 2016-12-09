@@ -93,6 +93,8 @@ socket.on('connect', () => {
 	socket.emit('get-chunk', increaseScaling(), store);
 });
 
+p2p.on('connection', socket => {
+	socket.on('hello', console.log.bind(console));
 });
 
 server.on('listening', () => {
