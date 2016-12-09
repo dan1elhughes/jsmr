@@ -65,6 +65,7 @@ let execute = components => {
 				v: content.result
 			});
 
+			socket.emit('p2p-haveKey', memKey);
 		}
 	};
 
