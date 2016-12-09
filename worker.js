@@ -86,7 +86,7 @@ socket.on('disconnect', () => console.log('DISC: Disconnected'));
 
 socket.on('connect', () => {
 	console.log('CONN: Connected');
-	server.listen();
+	server.listen(0, '127.0.0.1');
 
 	resetComponents();
 
