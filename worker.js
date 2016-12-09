@@ -12,6 +12,9 @@ let CHUNKSIZE = 1;
 let resetScaling = () => CHUNKSIZE = 1;
 let increaseScaling = () => CHUNKSIZE++;
 
+let processConnections = connections => {
+};
+
 let store = value => {
 	console.log(`STOR: ${JSON.stringify(value)}`);
 
@@ -27,6 +30,8 @@ let store = value => {
 			data: components.data,
 			fn: components.fn,
 		});
+	} else if (components.action === 'find') {
+		socket.emit('kvs-find', memory.map(element => element.k), processConnections);
 	}
 };
 
