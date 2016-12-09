@@ -1,9 +1,10 @@
 const console = require('util');
 
-module.exports = (name, components) => (quantity, respond) => {
-	console.log(`SEND: ${name}`);
+module.exports = (components) => (quantity, respond) => {
 
-	let { mapQueue, reduceQueue, map, reduce } = components;
+	let { socket, mapQueue, reduceQueue, map, reduce } = components;
+
+	console.log(`SEND: ${socket}`);
 
 	let fn, data, action;
 
@@ -16,9 +17,9 @@ module.exports = (name, components) => (quantity, respond) => {
 		data = reduceQueue.accumulate();
 		action = 'reduce';
 	} else {
-		fn = () => {};
+		fn = (() => {}).toString();
 		data = [];
-		action = 'done';
+		action = 'find';
 	}
 
 	respond({

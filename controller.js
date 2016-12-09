@@ -15,11 +15,12 @@ network.on('connection', socket => {
 
 	console.log(`CONN: ${socket.id}`);
 
-	socket.on('get-chunk', sendComponent('chunk', {
+	socket.on('get-chunk', sendComponent({
 		map: app.map,
 		reduce: app.reduce,
 		mapQueue,
-		reduceQueue
+		reduceQueue,
+		socket: socket.id,
 	}));
 
 	socket.on('disconnect', () => {
