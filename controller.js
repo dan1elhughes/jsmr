@@ -41,6 +41,13 @@ network.on('connection', socket => {
 
 	socket.on('p2p-register', p2p.register(socket.id));
 	socket.on('p2p-haveKey', p2p.hasKey(socket.id));
+
+	socket.on('kvs-find', (keys, respond) => {
+		respond(keys.map(key => ({
+			key,
+			hosts: p2p.findHostsWith(key, socket.id)
+		})).filter(connection => connection.hosts.length > 0));
+	});
 });
 
 server.on('listening', () => console.log('Listening'));
