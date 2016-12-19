@@ -6,24 +6,22 @@ module.exports = function (data) {
 	this.length = () => this.queue.length;
 
 	/**
-	 * Pops the first item off the queue and all other items with the same key.
-	 * @return {Array} A collection of items with matching keys
+	 * Pops the first item off the queue and removes all other items with the same key.
+	 * @return {Array} A single key
 	 */
 	this.accumulate = () => {
-		let first = this.queue.pop();
-		let matches = [];
+		let key, first = this.queue.pop();
 		if (first) {
-			matches.push(first);
-			let key = first.key;
+			key = first.key;
 
 			this.queue.forEach((element, i) => {
 				if (element.key === key) {
-					matches.push(this.pull(i));
+					this.pull(i);
 				}
 			});
 		}
 
-		return matches;
+		return key;
 	};
 
 	/**
