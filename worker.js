@@ -80,9 +80,44 @@ let execute = components => {
 
 	if (action === 'map') {
 		data.forEach(process);
+let getRemoteValue = (host, key) => new Promise(resolve => {
+	if (host.address === serverMeta.address && host.port === serverMeta.port) {
+		resolve(memory
+			.filter(item => item.k === key)
+			.map(item => item.v)
+		);
 	} else {
-		process(data);
+		network.connect(`http://${host.address}:${host.port}`).emit('kvs-get', key, values => {
+			resolve(values.map(value => value.v));
+		});
 	}
+});
+
+// POSSIBLE BUG:
+// If one node finishes before another and requests
+// a find on a key, it won't get map results for
+// the second node. Fix may be to wait for all
+// maps to finish before sending out any reduce
+// instructions, or change shuffle to a push model.
+let getRemoteValues = ({ key, hosts }) => Promise.all(
+	hosts.map(
+		host => getRemoteValue(host, key)
+	)
+);
+
+let reduce = components => {
+
+	let { data, fn } = components;
+
+	data.forEach(chunk => {
+		let { key, hosts } = chunk;
+
+		getRemoteValues({ key, hosts }).then(values => {
+			values = [].concat.apply([], values);
+			let result = processInVM(fn, values);
+			socket.emit('result', { key: `reduce/${key.split('/')[1]}`, action: 'reduce', result });
+		});
+	})
 
 	socket.emit(`get-chunk`, increaseScaling(), store);
 };
