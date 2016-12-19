@@ -2,8 +2,8 @@ const server = require('http').createServer();
 const p2p = require('socket.io').listen(server);
 const network = require('socket.io-client');
 const socket = network.connect('http://localhost:3000', { reconnect: true });
-const vm = require('vm');
 const console = require('util');
+const processInVM = require('./processInVM');
 
 let memory = [];
 let resetMemory = () => memory = [];
