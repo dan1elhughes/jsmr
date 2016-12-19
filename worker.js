@@ -12,23 +12,6 @@ let CHUNKSIZE = 1;
 let resetScaling = () => CHUNKSIZE = 1;
 let increaseScaling = () => CHUNKSIZE++;
 
-let processConnections = connections => {
-	console.log(JSON.stringify(connections));
-	connections.forEach(connection => {
-		connection.hosts.forEach(host => {
-			let ip = `http://${host.address}:${host.port}`;
-			console.log(ip);
-			let comm = network.connect(ip);
-
-
-			let r = Math.random();
-			console.log(`My R: ${r}`);
-			comm.emit('hello', r);
-			network.disconnect();
-		});
-	});
-};
-
 let store = value => {
 	console.log(`STOR: ${JSON.stringify(value)}`);
 
