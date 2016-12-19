@@ -41,47 +41,30 @@ let store = value => {
 	}
 };
 
-let execute = components => {
+let map = components => {
 
-	let { action, data, fn } = components;
+	let { data: dataArr, fn } = components;
 
-	let process = data => {
-		let context = vm.createContext({
-			console,
-			data
-		});
-
-		console.log(`PROC: ${JSON.stringify(data)}`);
-		let result = vm.runInContext(`((${fn})(data))`, context);
+	dataArr.forEach(data => {
+		let result = processInVM(fn, data);
 
 		if (typeof result !== 'undefined') {
-
-			let content = {
-				action: action
-			};
-
-			if (action === 'reduce') {
-				content.result = {
-					key: data[0].key,
-					value: result
-				};
-			} else {
-				content.result = result;
-			}
-
-			let memKey = `${action}/${content.result.key}`;
+			let key = `map/${result.key}`;
 
 			memory.push({
-				k: memKey,
-				v: content.result
+				k: key,
+				v: result
 			});
 
-			socket.emit('p2p-haveKey', memKey);
+			socket.emit('result', { key, action: 'map' });
+		} else {
+			console.log(`WARN: Got undefined processing ${data}`);
 		}
-	};
+	});
 
-	if (action === 'map') {
-		data.forEach(process);
+	socket.emit(`get-chunk`, increaseScaling(), store);
+};
+
 let getRemoteValue = (host, key) => new Promise(resolve => {
 	if (host.address === serverMeta.address && host.port === serverMeta.port) {
 		resolve(memory
