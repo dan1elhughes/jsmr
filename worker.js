@@ -141,7 +141,9 @@ socket.on('connect', () => {
 });
 
 p2p.on('connection', socket => {
-	socket.on('hello', console.log.bind(console));
+	socket.on('kvs-get', (keys, respond) => {
+		respond(memory.filter(item => keys.includes(item.v.key)));
+	});
 });
 
 server.on('listening', () => {
