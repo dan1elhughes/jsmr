@@ -31,17 +31,21 @@ network.on('connection', socket => {
 
 	socket.on('result', data => {
 		if (data.action === 'map') {
-			reduceQueue.push(data.result);
 			console.log(`MAPR: ${JSON.stringify(data)}`);
+
+			reduceQueue.push(data);
+			p2p.hasKey(socket.id)(data.key);
+
 		} else if (data.action === 'reduce') {
 			console.log(`RDCE: ${JSON.stringify(data)}`);
+
 		} else {
 			console.log(`????: ${JSON.stringify(data)}`);
+
 		}
 	});
 
 	socket.on('p2p-register', p2p.register(socket.id));
-	socket.on('p2p-haveKey', p2p.hasKey(socket.id));
 
 	socket.on('kvs-find', (keys, respond) => {
 		respond(keys.map(key => ({
