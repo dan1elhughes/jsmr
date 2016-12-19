@@ -2,9 +2,9 @@ const console = require('util');
 
 module.exports = (components) => (quantity, respond) => {
 
-	let { socket, mapQueue, reduceQueue, map, reduce } = components;
+	let { map, reduce, mapQueue, reduceQueue, socket, p2p } = components;
 
-	console.log(`SEND: ${socket}`);
+	console.log(`SEND: ${socket} (${quantity})`);
 
 	let fn, data, action;
 
@@ -14,12 +14,19 @@ module.exports = (components) => (quantity, respond) => {
 		action = 'map';
 	} else if (reduceQueue.length() > 0) {
 		fn = reduce.toString();
-		data = reduceQueue.accumulate();
+		data = [];
+		while (quantity-- > 0) {
+			let key = reduceQueue.accumulate();
+			let hosts = p2p.findHostsWith(key);
+			if (key) {
+				data.push({ key, hosts });
+			}
+		}
 		action = 'reduce';
 	} else {
 		fn = (() => {}).toString();
 		data = [];
-		action = 'find';
+		action = 'done';
 	}
 
 	respond({

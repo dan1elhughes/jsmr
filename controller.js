@@ -21,6 +21,7 @@ network.on('connection', socket => {
 		mapQueue,
 		reduceQueue,
 		socket: socket.id,
+		p2p,
 	}));
 
 	socket.on('disconnect', () => {
