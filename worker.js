@@ -5,6 +5,8 @@ const socket = network.connect('http://localhost:3000', { reconnect: true });
 const console = require('util');
 const processInVM = require('./processInVM');
 
+let serverMeta;
+
 let memory = [];
 let resetMemory = () => memory = [];
 
@@ -143,5 +145,6 @@ p2p.on('connection', socket => {
 });
 
 server.on('listening', () => {
-	socket.emit('p2p-register', server.address());
+	serverMeta = server.address();
+	socket.emit('p2p-register', serverMeta);
 });
