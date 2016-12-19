@@ -35,17 +35,24 @@ let store = value => {
 	let components = {
 		action: value.action,
 		data: value.data,
-		fn: value.fn ? value.fn.replace(/\s\s+/g, ' ') : undefined,
+		fn: value.fn.replace(/\s\s+/g, ' '),
 	};
 
-	if (components.data && components.fn && !(['done', 'find'].includes(components.action))) {
-		execute({
-			action: components.action,
-			data: components.data,
-			fn: components.fn,
-		});
-	} else if (components.action === 'find') {
-		socket.emit('kvs-find', memory.map(element => element.k), processConnections);
+	if (components.data && components.fn) {
+		if (components.action === 'map') {
+			map({
+				data: components.data,
+				fn: components.fn,
+			});
+		} else if (components.action === 'reduce') {
+			reduce({
+				data: components.data,
+				fn: components.fn,
+			});
+		} else if (components.action === 'done') {
+			console.log(`No more work.`);
+			// process.exit(0);
+		}
 	}
 };
 
