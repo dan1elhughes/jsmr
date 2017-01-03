@@ -7,7 +7,7 @@ module.exports = function (data) {
 
 	/**
 	 * Pops the first item off the queue and removes all other items with the same key.
-	 * @return {Array} A single key
+	 * @return {String} A single key
 	 */
 	this.accumulate = () => {
 		let key, first = this.queue.pop();
