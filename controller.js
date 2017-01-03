@@ -6,8 +6,14 @@ const app = require('./wordcount/app');
 const Queue = require('./Queue');
 const P2P = require('./p2p');
 
-let mapQueue = new Queue(app.partition(app.load()));
+let mapQueue = new Queue();
 let reduceQueue = new Queue();
+let results = {};
+
+app.load().on('data', chunk => {
+	let data = app.transform ? app.transform(chunk) : chunk;
+	mapQueue.concat(data);
+});
 
 let p2p = new P2P();
 
