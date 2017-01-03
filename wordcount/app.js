@@ -5,12 +5,14 @@ module.exports = {
 		encoding: 'UTF-8'
 	}),
 
-	partition: content => content
-		.split(' ')
+	transform: content => content
+		.split(/\n| /) // Split on newlines and spaces
 		.map(word => word
-			.replace(/\W/g, '')
-			.toLowerCase()
-		),
+			.trim() // Remove extra spacing around words
+			.replace(/\W/g, '') // Remove any non-alphabet characters
+			.toLowerCase() // Convert words to lowercase
+		)
+		.filter(word => word !== ''), // Remove any empty words (i.e. just symbols)
 
 	map: word => ({ key: word, value: 1 }),
 
