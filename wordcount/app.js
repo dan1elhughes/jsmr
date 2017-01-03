@@ -14,8 +14,6 @@ module.exports = {
 
 	map: word => ({ key: word, value: 1 }),
 
-	shuffle: (a, b) => a.key === b.key,
-
 	reduce: collection => collection.reduce((sum, word) => sum + word.value, 0),
 
 	combine: collection => collection
