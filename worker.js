@@ -124,8 +124,8 @@ socket.on('connect', () => {
 });
 
 p2p.on('connection', socket => {
-	socket.on('kvs-get', (keys, respond) => {
-		respond(memory.filter(item => keys.includes(item.v.key)));
+	socket.on('kvs-get', (key, respond) => {
+		respond(memory.filter(item => item.v.key === key));
 	});
 });
 
