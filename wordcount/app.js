@@ -18,6 +18,8 @@ module.exports = {
 
 	reduce: collection => collection.reduce((sum, word) => sum + word.value, 0),
 
+	filter: result => result > 1,
+
 	combine: collection => collection
 		.sort((a, b) => b.value - a.value)
 		.map(word => word.key)

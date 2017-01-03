@@ -44,10 +44,9 @@ network.on('connection', socket => {
 
 		} else if (data.action === 'reduce') {
 			console.log(`RDCE: ${JSON.stringify(data)}`);
-
-		} else {
-			console.log(`????: ${JSON.stringify(data)}`);
-
+			if (app.filter(data.result)) {
+				results[data.key.split('/')[1]] = data.result;
+			}
 		}
 	});
 
