@@ -2,7 +2,7 @@ const server = require('http').createServer();
 const p2p = require('socket.io').listen(server);
 const network = require('socket.io-client');
 const socket = network.connect('http://localhost:3000', { reconnect: true });
-const console = require('util');
+const log = require('single-line-log')(process.stdout);
 const processInVM = require('./processInVM');
 
 let serverMeta;
@@ -15,7 +15,7 @@ let resetScaling = () => CHUNKSIZE = 1;
 let increaseScaling = () => CHUNKSIZE++;
 
 let store = value => {
-	console.log(`STOR: ${JSON.stringify(value)}`);
+	// console.log(`STOR: ${JSON.stringify(value)}`);
 
 	let components = {
 		action: value.action,
@@ -35,8 +35,7 @@ let store = value => {
 				fn: components.fn,
 			});
 		} else if (components.action === 'done') {
-			console.log(`No more work.`);
-			// process.exit(0);
+			// console.log(`No more work.`);
 		}
 	}
 };
@@ -45,7 +44,10 @@ let map = components => {
 
 	let { data: dataArr, fn } = components;
 
-	dataArr.forEach(data => {
+	let length = dataArr.length;
+
+	dataArr.forEach((data, i) => {
+		log(`MAP :: ${i+1} of ${length}\n`);
 		let result = processInVM(fn, data);
 
 		if (typeof result !== 'undefined') {
@@ -61,6 +63,8 @@ let map = components => {
 			console.log(`WARN: Got undefined processing ${data}`);
 		}
 	});
+
+	console.log(''); // Blank line to indicate map has finished
 
 	socket.emit(`get-chunk`, increaseScaling(), store);
 };
@@ -98,11 +102,15 @@ let reduce = components => {
 		let { key, hosts } = chunk;
 
 		getRemoteValues({ key, hosts }).then(values => {
+			key = key.split('/')[1];
 			values = [].concat.apply([], values);
+			log(`RDCE :: ${key}`);
 			let result = processInVM(fn, values);
-			socket.emit('result', { key: `reduce/${key.split('/')[1]}`, action: 'reduce', result });
+			log(`RDCE :: ${key} => ${result} ${JSON.stringify(values)}`);
+			console.log('');
+			socket.emit('result', { key: `reduce/${key}`, action: 'reduce', result });
 		});
-	})
+	});
 
 	socket.emit(`get-chunk`, increaseScaling(), store);
 };

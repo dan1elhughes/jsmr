@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/dan1elhughes/fyp#readme",
   "dependencies": {
+    "single-line-log": "^1.1.2",
     "socket.io": "^1.5.0",
     "socket.io-client": "^1.5.0"
   },

@@ -13,7 +13,7 @@ module.exports = (fn, data) => {
 		data
 	});
 
-	console.log(`PROC: ${JSON.stringify(data)}`);
+	// console.log(`PROC: ${JSON.stringify(data)}`);
 	let result = vm.runInContext(`((${fn})(data))`, context);
 
 	return result;
