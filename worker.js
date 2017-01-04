@@ -47,7 +47,7 @@ let map = components => {
 	let length = dataArr.length;
 
 	dataArr.forEach((data, i) => {
-		log(`MAP :: ${i+1} of ${length}\n`);
+		log(`MAP :: ${i+1} of ${length} (${data})\n`);
 		let result = processInVM(fn, data);
 
 		if (typeof result !== 'undefined') {
@@ -106,7 +106,7 @@ let reduce = components => {
 			values = [].concat.apply([], values);
 			log(`RDCE :: ${key}`);
 			let result = processInVM(fn, values);
-			log(`RDCE :: ${key} => ${result} ${JSON.stringify(values)}`);
+			log(`RDCE :: ${key} => ${result}`);
 			console.log('');
 			socket.emit('result', { key: `reduce/${key}`, action: 'reduce', result });
 		});
