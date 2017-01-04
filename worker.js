@@ -133,7 +133,7 @@ socket.on('connect', () => {
 
 p2p.on('connection', socket => {
 	socket.on('kvs-get', (key, respond) => {
-		respond(memory.filter(item => item.v.key === key));
+		respond(memory.filter(item => item.k === key));
 	});
 });
 
