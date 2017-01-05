@@ -1,8 +1,17 @@
 module.exports = function (data) {
 	this.queue = data ? data.slice() : [];
 
+	/**
+	 * Pushes an element onto the end of the queue.
+	 * @param {*} item An element to be appended.
+	 * @return {Number} The new length of the queue.
+	 */
 	this.push = this.queue.push.bind(this.queue);
 
+	/**
+	 * Calculates the length of the queue.
+	 * @return {Number} The length of the internal queue store.
+	 */
 	this.length = () => this.queue.length;
 
 	/**
@@ -31,6 +40,11 @@ module.exports = function (data) {
 	 */
 	this.pull = i => this.queue.splice(i, 1)[0];
 
+	/**
+	 * Removes items from the front of the queue.
+	 * @param  {Number} count The number of items to remove from the queue. Defaults to 1.
+	 * @return {Array} The items popped off the queue.
+	 */
 	this.pop = count => {
 		count = count || 1;
 		let results = [];
