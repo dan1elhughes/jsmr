@@ -20,7 +20,7 @@ module.exports = {
 
 	filter: result => result > 1,
 
-	combine: collection => collection
+	aggregate: collection => collection
 		.sort((a, b) => b.value - a.value)
 		.map(word => word.key)
 };
