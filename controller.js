@@ -18,6 +18,10 @@ app.load().on('data', chunk => {
 	mapQueue.concat(data);
 });
 
+if (typeof app.filter === 'undefined') {
+	app.filter = () => true;
+}
+
 let p2p = new P2P();
 
 network.on('connection', socket => {
