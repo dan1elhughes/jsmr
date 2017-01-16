@@ -58,7 +58,9 @@ network.on('connection', socket => {
 				}
 			});
 			if (reduceQueue.length() === 0) {
-				process.exit(0);
+				app.write(results).then(() => {
+					process.exit(0);
+				});
 			}
 		}
 	});
