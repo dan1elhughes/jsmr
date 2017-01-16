@@ -52,8 +52,13 @@ network.on('connection', socket => {
 
 		} else if (data.action === 'reduce') {
 			console.log(`RDCE: ${JSON.stringify(data)}`);
-			if (app.filter(data.result)) {
-				results[data.key.split('/')[1]] = data.result;
+			data.results.forEach(result => {
+				if (app.filter(result.value)) {
+					results[result.key.split('/')[1]] = result.value;
+				}
+			});
+			if (reduceQueue.length() === 0) {
+				process.exit(0);
 			}
 		}
 	});

@@ -117,6 +117,8 @@ let reduce = components => {
 	let length = data.length;
 	let done = 0;
 
+	let results = [];
+
 	data.forEach(chunk => {
 		let { key, hosts } = chunk;
 
@@ -125,12 +127,13 @@ let reduce = components => {
 			values = [].concat.apply([], values); // Converts a nested array into a flat array
 
 			log('RDCE', key, REWRITEABLE);
-			let result = processInVM(fn, values);
-			log('RDCE' , `${key} => ${result}`);
+			let value = processInVM(fn, values);
+			log('RDCE' , `${key} => ${value}`);
 
-			socket.emit('result', { key: `reduce/${key}`, action: 'reduce', result });
+			results.push({ key: `reduce/${key}`, value });
 
 			if (++done === length) {
+				socket.emit('result', { action: 'reduce', results });
 				socket.emit(`get-chunk`, increaseScaling(), store);
 			}
 		});
