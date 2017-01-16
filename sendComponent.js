@@ -2,7 +2,7 @@ const console = require('util');
 
 module.exports = (components) => (quantity, respond) => {
 
-	let { map, reduce, mapQueue, reduceQueue, socket, p2p } = components;
+	let { map, reduce, mapQueue, reduceQueue, socket, p2p, debug } = components;
 
 	console.log(`SEND: ${socket} (${quantity})`);
 
@@ -29,9 +29,16 @@ module.exports = (components) => (quantity, respond) => {
 		action = 'done';
 	}
 
-	respond({
+	let output = () => respond({
 		action,
 		data,
+		debug,
 		fn,
 	});
+
+	if (debug.slow) {
+		setTimeout(output, 500);
+	} else {
+		output();
+	}
 };

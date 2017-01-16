@@ -2,8 +2,8 @@ const server = require('http').createServer();
 const p2p = require('socket.io').listen(server);
 const network = require('socket.io-client');
 const socket = network.connect('http://localhost:3000', { reconnect: true });
-const log = require('single-line-log')(process.stdout);
 const processInVM = require('./processInVM');
+const { print, CLEAR, REWRITEABLE } = require('./debug');
 
 let serverMeta;
 
@@ -13,14 +13,16 @@ let resetMemory = () => memory = [];
 let CHUNKSIZE = 1;
 let resetScaling = () => CHUNKSIZE = 1;
 let increaseScaling = () => CHUNKSIZE++;
+let log = print(true);
 
 let store = value => {
-	// console.log(`STOR: ${JSON.stringify(value)}`);
+	log = print(value.debug.print);
 
 	let components = {
 		action: value.action,
 		data: value.data,
 		fn: value.fn.replace(/\s\s+/g, ' '),
+		debug: value.debug,
 	};
 
 	if (components.data && components.fn) {
@@ -28,11 +30,13 @@ let store = value => {
 			map({
 				data: components.data,
 				fn: components.fn,
+				debug: components.debug,
 			});
 		} else if (components.action === 'reduce') {
 			reduce({
 				data: components.data,
 				fn: components.fn,
+				debug: components.debug,
 			});
 		} else if (components.action === 'done') {
 			// console.log(`No more work.`);
@@ -42,31 +46,42 @@ let store = value => {
 
 let map = components => {
 
-	let { data: dataArr, fn } = components;
+	let { data: dataArr, fn, debug } = components;
 
 	let length = dataArr.length;
+	let done = 0;
 
 	dataArr.forEach((data, i) => {
-		log(`MAP :: ${i+1} of ${length} (${data})\n`);
-		let result = processInVM(fn, data);
+		let output = () => {
+			log('map', `${i+1} of ${length} (${data})`, REWRITEABLE);
+			let result = processInVM(fn, data);
 
-		if (typeof result !== 'undefined') {
-			let key = `map/${result.key}`;
+			if (typeof result !== 'undefined') {
+				let key = `map/${result.key}`;
 
-			memory.push({
-				k: key,
-				v: result
-			});
+				memory.push({
+					k: key,
+					v: result
+				});
 
-			socket.emit('result', { key, action: 'map' });
+				socket.emit('result', { key, action: 'map' });
+			} else {
+				console.log(`WARN: Got undefined processing ${data}`);
+			}
+
+			if (++done === length) {
+				log(CLEAR); // Blank line to indicate map has finished
+				socket.emit(`get-chunk`, increaseScaling(), store);
+			}
+		};
+
+		if (debug.slow) {
+			setTimeout(output, 250 * i);
 		} else {
-			console.log(`WARN: Got undefined processing ${data}`);
+			output();
 		}
 	});
 
-	console.log(''); // Blank line to indicate map has finished
-
-	socket.emit(`get-chunk`, increaseScaling(), store);
 };
 
 let getRemoteValue = (host, key) => new Promise(resolve => {
@@ -96,33 +111,40 @@ let getRemoteValues = ({ key, hosts }) => Promise.all(
 
 let reduce = components => {
 
+	log('RDCE', `Got ${components.data.length} keys`);
 	let { data, fn } = components;
+
+	let length = data.length;
+	let done = 0;
 
 	data.forEach(chunk => {
 		let { key, hosts } = chunk;
 
 		getRemoteValues({ key, hosts }).then(values => {
 			key = key.split('/')[1];
-			values = [].concat.apply([], values);
-			log(`RDCE :: ${key}`);
+			values = [].concat.apply([], values); // Converts a nested array into a flat array
+
+			log('RDCE', key, REWRITEABLE);
 			let result = processInVM(fn, values);
-			log(`RDCE :: ${key} => ${result}`);
-			console.log('');
+			log('RDCE' , `${key} => ${result}`);
+
 			socket.emit('result', { key: `reduce/${key}`, action: 'reduce', result });
+
+			if (++done === length) {
+				socket.emit(`get-chunk`, increaseScaling(), store);
+			}
 		});
 	});
-
-	socket.emit(`get-chunk`, increaseScaling(), store);
 };
 
 socket.on('disconnect', () => {
 	resetMemory();
 	resetScaling();
-	console.log('DISC: Disconnected');
+	log('DISC', 'Disconnected');
 });
 
 socket.on('connect', () => {
-	console.log('CONN: Connected');
+	log('CONN', 'Connected');
 	server.listen(0, '127.0.0.1');
 
 	resetMemory();

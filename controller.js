@@ -5,6 +5,9 @@ const sendComponent = require('./sendComponent');
 const app = require('./wordcount/app');
 const Queue = require('./Queue');
 const P2P = require('./p2p');
+const { print, CLEAR, REWRITEABLE } = require('./debug');
+
+let log = print(app.debug.print);
 
 let mapQueue = new Queue();
 let reduceQueue = new Queue();
@@ -28,6 +31,7 @@ network.on('connection', socket => {
 		reduceQueue,
 		socket: socket.id,
 		p2p,
+		debug: app.debug
 	}));
 
 	socket.on('disconnect', () => {
