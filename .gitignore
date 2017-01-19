@@ -1,3 +1,8 @@
+# Generated output data
+output/*
+
+#### Stock .gitignore follows ####
+
 # Logs
 logs
 *.log

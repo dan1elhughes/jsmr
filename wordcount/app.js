@@ -28,6 +28,6 @@ module.exports = {
 		.map(word => word.key),
 
 	write: result => new Promise(resolve => {
-		fs.writeFile('./wordcount/output.txt', JSON.stringify(result, null, '\t'), 'utf8', resolve);
+		fs.writeFile('./output/output.json', JSON.stringify(result, null, '\t'), 'utf8', resolve);
 	})
 };
