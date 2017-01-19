@@ -61,7 +61,6 @@ network.on('connection', socket => {
 				}
 			});
 			if (reduceQueue.length() === 0) {
-				console.log(results);
 				app.write(app.aggregate(results)).then(() => {
 					process.exit(0);
 				});
