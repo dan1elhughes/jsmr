@@ -108,11 +108,11 @@ describe('Queue', () => {
 	});
 
 	describe('.pop()', () => {
-		it('does nothing on an empty array', () => {
+		it('returns an empty on an empty array', () => {
 			let q = new Queue();
 			let result = q.pop();
 
-			assert.isUndefined(result);
+			assert.deepEqual(result, []);
 			assert.deepEqual(q.queue, []);
 		});
 
