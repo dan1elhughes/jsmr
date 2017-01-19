@@ -53,7 +53,7 @@ let map = components => {
 
 	dataArr.forEach((data, i) => {
 		let output = () => {
-			log('map', `${i+1} of ${length} (${data})`, REWRITEABLE);
+			log('MAP', `${i+1} of ${length} (${data})`, REWRITEABLE);
 			let result = processInVM(fn, data);
 
 			if (typeof result !== 'undefined') {
