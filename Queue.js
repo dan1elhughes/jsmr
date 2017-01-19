@@ -19,7 +19,7 @@ module.exports = function (data) {
 	 * @return {String} A single key
 	 */
 	this.accumulate = () => {
-		let key, first = this.queue.pop();
+		let key, first = this.pop()[0];
 		if (first) {
 			key = first.key;
 
