@@ -3,7 +3,7 @@ const fs = require('fs');
 module.exports = {
 	debug: {
 		print: true,
-		slow: true
+		// slow: true
 	},
 
 	load: () => fs.createReadStream('wordcount/data.txt', {
