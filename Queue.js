@@ -19,7 +19,7 @@ module.exports = function (data) {
 	 * @return {String} A single key
 	 */
 	this.accumulate = () => {
-		let key, first = this.queue.pop();
+		let key, first = this.pop()[0];
 		if (first) {
 			key = first.key;
 
@@ -38,7 +38,13 @@ module.exports = function (data) {
 	 * @param  {Number} i Index of the item to remove
 	 * @return {Element} The element
 	 */
-	this.pull = i => this.queue.splice(i, 1)[0];
+	this.pull = i => {
+		if (typeof i === 'undefined') {
+			return undefined;
+		}
+
+		return this.queue.splice(i, 1)[0];
+	};
 
 	/**
 	 * Removes items from the front of the queue.
@@ -66,5 +72,9 @@ module.exports = function (data) {
 	 * Appends an array onto the queue.
 	 * @param  {Array} arr An array to be pushed onto the queue
 	 */
-	this.concat = arr => this.queue = this.queue.concat(arr);
+	this.concat = arr => {
+		if (arr && arr.length > 0) {
+			this.queue = this.queue.concat(arr);
+		}
+	};
 };

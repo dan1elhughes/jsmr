@@ -54,10 +54,10 @@ describe('Queue', () => {
 	});
 
 	describe('.accumulate()', () => {
-		it('returns an empty array with an empty queue', () => {
+		it('returns an undefined key with an empty queue', () => {
 			let q = new Queue();
 			let result = q.accumulate();
-			assert.deepEqual(result, []);
+			assert.isUndefined(result);
 		});
 
 		it('removes all items when returning a key', () => {
@@ -108,11 +108,11 @@ describe('Queue', () => {
 	});
 
 	describe('.pop()', () => {
-		it('does nothing on an empty array', () => {
+		it('returns an empty on an empty array', () => {
 			let q = new Queue();
 			let result = q.pop();
 
-			assert.isUndefined(result);
+			assert.deepEqual(result, []);
 			assert.deepEqual(q.queue, []);
 		});
 
