@@ -11,7 +11,7 @@ let log = print(app.debug.print);
 
 let mapQueue = new Queue();
 let reduceQueue = new Queue();
-let results = {};
+let results = [];
 
 app.load().on('data', chunk => {
 	let data = app.transform ? app.transform(chunk) : chunk;
@@ -53,8 +53,11 @@ network.on('connection', socket => {
 		} else if (data.action === 'reduce') {
 			console.log(`RDCE: ${JSON.stringify(data)}`);
 			data.results.forEach(result => {
-				if (app.filter(result.value)) {
-					results[result.key.split('/')[1]] = result.value;
+				if (app.filter(result)) {
+					results.push({
+						key: result.key.split('/')[1],
+						value: result.value
+					});
 				}
 			});
 			if (reduceQueue.length() === 0) {
