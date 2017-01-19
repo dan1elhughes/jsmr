@@ -23,9 +23,10 @@ module.exports = {
 
 	reduce: collection => collection.reduce((sum, word) => sum + word.value, 0),
 
+	filter: word => word.value > 1,
+
 	aggregate: collection => collection
-		.sort((a, b) => b.value - a.value)
-		.map(word => word.key),
+		.sort((a, b) => b.value - a.value),
 
 	write: result => new Promise(resolve => {
 		fs.writeFile('./output/output.json', JSON.stringify(result, null, '\t'), 'utf8', resolve);
