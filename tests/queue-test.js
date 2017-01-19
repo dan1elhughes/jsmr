@@ -54,10 +54,10 @@ describe('Queue', () => {
 	});
 
 	describe('.accumulate()', () => {
-		it('returns an empty array with an empty queue', () => {
+		it('returns an undefined key with an empty queue', () => {
 			let q = new Queue();
 			let result = q.accumulate();
-			assert.deepEqual(result, []);
+			assert.isUndefined(result);
 		});
 
 		it('removes all items when returning a key', () => {
