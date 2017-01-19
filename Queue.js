@@ -38,7 +38,13 @@ module.exports = function (data) {
 	 * @param  {Number} i Index of the item to remove
 	 * @return {Element} The element
 	 */
-	this.pull = i => this.queue.splice(i, 1)[0];
+	this.pull = i => {
+		if (typeof i === 'undefined') {
+			return undefined;
+		}
+
+		return this.queue.splice(i, 1)[0];
+	};
 
 	/**
 	 * Removes items from the front of the queue.
