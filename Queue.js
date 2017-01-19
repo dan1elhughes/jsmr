@@ -72,5 +72,9 @@ module.exports = function (data) {
 	 * Appends an array onto the queue.
 	 * @param  {Array} arr An array to be pushed onto the queue
 	 */
-	this.concat = arr => this.queue = this.queue.concat(arr);
+	this.concat = arr => {
+		if (arr && arr.length > 0) {
+			this.queue = this.queue.concat(arr);
+		}
+	};
 };
