@@ -14,11 +14,13 @@ module.exports = function () {
 	 * @return {void}
 	 */
 	this.register = id => host => {
-		this.hosts[id] = {
-			address: host.address,
-			port: host.port
-		};
-		this.hosts[id].keys = [];
+		if (id && host && host.address && host.port) {
+			this.hosts[id] = {
+				address: host.address,
+				port: host.port
+			};
+			this.hosts[id].keys = [];
+		}
 	};
 
 	/**
@@ -38,14 +40,16 @@ module.exports = function () {
 	 * @return {void}
 	 */
 	this.hasKey = id => key => {
-		this.hosts[id].keys.push(key);
+		if (id && key && this.hosts[id]) {
+			this.hosts[id].keys.push(key);
+		}
 	};
 
 	/**
 	 * Finds hosts with certain keys.
 	 * @param  {String} key    The key of the key/value pair.
 	 * @param  {String} source The socket ID of the request originator.
-	 * @return {Object}        Remote connection details for every host with something for the key.
+	 * @return {Array}        Remote connection details for every host with something for the key.
 	 */
 	this.findHostsWith = (key, source) => {
 		let r = [];
