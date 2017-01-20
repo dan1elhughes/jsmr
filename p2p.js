@@ -14,11 +14,13 @@ module.exports = function () {
 	 * @return {void}
 	 */
 	this.register = id => host => {
-		this.hosts[id] = {
-			address: host.address,
-			port: host.port
-		};
-		this.hosts[id].keys = [];
+		if (id && host && host.address && host.port) {
+			this.hosts[id] = {
+				address: host.address,
+				port: host.port
+			};
+			this.hosts[id].keys = [];
+		}
 	};
 
 	/**
