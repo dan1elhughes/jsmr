@@ -40,7 +40,9 @@ module.exports = function () {
 	 * @return {void}
 	 */
 	this.hasKey = id => key => {
-		this.hosts[id].keys.push(key);
+		if (id && key && this.hosts[id]) {
+			this.hosts[id].keys.push(key);
+		}
 	};
 
 	/**
