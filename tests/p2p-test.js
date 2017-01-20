@@ -100,6 +100,12 @@ describe('P2P', () => {
 			assert.deepEqual(p.hosts, {});
 		});
 
+		it('does nothing with an invalid id', () => {
+			let p = new P2P();
+			p.hasKey('id')('key');
+			assert.deepEqual(p.hosts, {});
+		});
+
 		it('registers a key as residing on the host with the given ID', () => {
 			let p = new P2P();
 			p.register('id')({
