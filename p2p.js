@@ -47,7 +47,7 @@ module.exports = function () {
 	 * Finds hosts with certain keys.
 	 * @param  {String} key    The key of the key/value pair.
 	 * @param  {String} source The socket ID of the request originator.
-	 * @return {Object}        Remote connection details for every host with something for the key.
+	 * @return {Array}        Remote connection details for every host with something for the key.
 	 */
 	this.findHostsWith = (key, source) => {
 		let r = [];
