@@ -42,7 +42,8 @@ describe('P2P', () => {
 				id: {
 					address: 'address',
 					port: 'port',
-					keys: []
+					keys: [],
+					backups: []
 				}
 			});
 		});
@@ -72,7 +73,8 @@ describe('P2P', () => {
 				id: {
 					address: 'address',
 					port: 'port',
-					keys: []
+					keys: [],
+					backups: []
 				}
 			});
 
@@ -113,13 +115,49 @@ describe('P2P', () => {
 				port: 'port'
 			});
 			p.hasKey('id')('key');
-			assert.deepEqual(p.hosts, {
-				id: {
-					address: 'address',
-					port: 'port',
-					keys: ['key']
-				}
-			});
+
+			assert.equal(p.hosts.id.address, 'address');
+			assert.equal(p.hosts.id.port, 'port');
+		});
+	});
+
+	describe('.getLightestPeer()', () => {
+		it('does nothing when no nodes are connected', () => {
+			let p = new P2P();
+			let lightest = p.getLightestPeer();
+			assert.isUndefined(lightest);
+		});
+
+		it('stores the key at a secondary location', () => {
+			let p = new P2P();
+
+			p.register('id1')({ address: 'address1', port: 'port1' });
+			p.register('id2')({ address: 'address2', port: 'port2' });
+
+			p.hasKey('id1')('key1');
+
+			assert.include(p.hosts.id2.backups, 'key1');
+		});
+
+		it('returns the ID of the peer with lightest load', () => {
+			let p = new P2P();
+
+			p.register('id1')({ address: 'address1', port: 'port1' });
+			p.register('id2')({ address: 'address2', port: 'port2' });
+			p.register('id3')({ address: 'address3', port: 'port3' });
+
+			p.hasKey('id1')('key1');
+			p.hasKey('id2')('key2');
+			p.hasKey('id2')('key3');
+
+			let lightest = p.getLightestPeer();
+			assert.equal(lightest, 'id3');
+
+			p.hasKey('id1')('key4');
+			p.hasKey('id1')('key5');
+
+			lightest = p.getLightestPeer();
+			assert.equal(lightest, 'id2');
 		});
 	});
 
@@ -143,18 +181,13 @@ describe('P2P', () => {
 				port: 'port'
 			});
 			p.hasKey('id')('key');
-			assert.deepEqual(p.hosts, {
-				id: {
-					address: 'address',
-					port: 'port',
-					keys: ['key']
-				}
-			});
 
 			let hosts = p.findHostsWith('key', 'source');
+
 			assert.deepEqual(hosts, [{
 				address: 'address',
-				port: 'port'
+				port: 'port',
+				type: 'primary'
 			}]);
 		});
 
@@ -165,13 +198,6 @@ describe('P2P', () => {
 				port: 'port'
 			});
 			p.hasKey('id')('key');
-			assert.deepEqual(p.hosts, {
-				id: {
-					address: 'address',
-					port: 'port',
-					keys: ['key']
-				}
-			});
 
 			let hosts = p.findHostsWith('key', 'id');
 			assert.deepEqual(hosts, []);
