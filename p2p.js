@@ -20,6 +20,7 @@ module.exports = function () {
 				port: host.port
 			};
 			this.hosts[id].keys = [];
+			this.hosts[id].backups = [];
 		}
 	};
 
@@ -42,7 +43,29 @@ module.exports = function () {
 	this.hasKey = id => key => {
 		if (id && key && this.hosts[id]) {
 			this.hosts[id].keys.push(key);
+			this.hosts[this.getLightestPeer()].backups.push(key);
 		}
+	};
+
+	/**
+	 * Returns the ID of the peer storing the least amount of data.
+	 * @return {String} The socket ID of the lightest node
+	 */
+	this.getLightestPeer = () => {
+		let lightest = {
+			id: undefined,
+			keys: Infinity
+		};
+
+		Object.keys(this.hosts).forEach(id => {
+			let keys = this.hosts[id].keys.length + this.hosts[id].backups.length;
+
+			if (keys < lightest.keys) {
+				lightest = { id, keys };
+			}
+		});
+
+		return lightest.id;
 	};
 
 	/**
@@ -54,11 +77,22 @@ module.exports = function () {
 	this.findHostsWith = (key, source) => {
 		let r = [];
 		Object.keys(this.hosts).forEach(id => {
-			if (this.hosts[id].keys.includes(key) && id !== source) {
-				r.push({
-					address: this.hosts[id].address,
-					port: this.hosts[id].port,
-				});
+			if (id !== source) {
+				let type;
+
+				if (this.hosts[id].keys.includes(key) && id !== source) {
+					type = 'primary';
+				} else if (this.hosts[id].backups.includes(key) && id !== source) {
+					type = 'secondary';
+				}
+
+				if (type) {
+					r.push({
+						address: this.hosts[id].address,
+						port: this.hosts[id].port,
+						type
+					});
+				}
 			}
 		});
 		return r;
