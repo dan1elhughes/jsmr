@@ -28,6 +28,8 @@ module.exports = function (data) {
 					this.pull(i);
 				}
 			});
+
+			this.pull(true);
 		}
 
 		return key;
@@ -43,7 +45,12 @@ module.exports = function (data) {
 			return undefined;
 		}
 
-		return this.queue.splice(i, 1)[0];
+		if (i === true) {
+			this.queue = this.queue.filter(each => !each._expired);
+			return;
+		}
+
+		this.queue[i]._expired = true;
 	};
 
 	/**
