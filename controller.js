@@ -49,6 +49,7 @@ network.on('connection', socket => {
 
 			reduceQueue.push(data);
 			p2p.hasKey(socket.id)(data.key);
+			p2p.registerBackup(socket.id)(data);
 
 		} else if (data.action === 'reduce') {
 			console.log(`RDCE: ${JSON.stringify(data)}`);
