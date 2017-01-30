@@ -6,7 +6,9 @@ module.exports = function (data) {
 	 * @param {*} item An element to be appended.
 	 * @return {Number} The new length of the queue.
 	 */
-	this.push = this.queue.push.bind(this.queue);
+	this.push = value => {
+		this.queue.push(value);
+	};
 
 	/**
 	 * Calculates the length of the queue.
