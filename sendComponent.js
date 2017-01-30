@@ -31,8 +31,11 @@ module.exports = (components) => (quantity, respond) => {
 		action = 'done';
 	}
 
+	let backups = p2p.claimBackups(socket);
+
 	let output = () => respond({
 		action,
+		backups,
 		data,
 		debug,
 		fn,
