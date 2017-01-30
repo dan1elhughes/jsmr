@@ -17,9 +17,11 @@ module.exports = (components) => (quantity, respond) => {
 		data = [];
 		while (quantity-- > 0) {
 			let key = reduceQueue.accumulate();
-			let hosts = p2p.findHostsWith(key);
 			if (key) {
-				data.push({ key, hosts });
+				data.push({
+					key,
+					hosts: p2p.findHostsWith(key)
+				});
 			}
 		}
 		action = 'reduce';
