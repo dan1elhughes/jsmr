@@ -8,7 +8,9 @@ const { print, CLEAR, REWRITEABLE } = require('./debug');
 let serverMeta;
 
 let memory = [];
+let backups = [];
 let resetMemory = () => memory = [];
+let resetBackups = () => backups = [];
 
 let CHUNKSIZE = 1;
 let resetScaling = () => CHUNKSIZE = 1;
@@ -23,6 +25,7 @@ let store = value => {
 		data: value.data,
 		fn: value.fn.replace(/\s\s+/g, ' '),
 		debug: value.debug,
+		backups: value.backups,
 	};
 
 	if (components.data && components.fn) {
@@ -42,6 +45,28 @@ let store = value => {
 			// console.log(`No more work.`);
 		}
 	}
+
+	if (components.backups) {
+		fetchBackups(components.backups);
+	}
+};
+
+let fetchBackup = ({ key, host}) => new Promise(resolve => {
+	network.connect(`http://${host.address}:${host.port}`).emit('kvs-get', key, values => {
+		resolve(values.map(value => ({
+			key: value.k,
+			value: value.v.value
+		})));
+	});
+});
+
+let fetchBackups = keys => {
+	Promise.all(keys.map(fetchBackup)).then(values => {
+		values = [].concat.apply([], values);
+		backups = backups.concat(values);
+
+		// console.log(values);
+	});
 };
 
 let map = components => {
@@ -142,7 +167,9 @@ let reduce = components => {
 
 socket.on('disconnect', () => {
 	resetMemory();
+	resetBackups();
 	resetScaling();
+
 	log('DISC', 'Disconnected');
 });
 
@@ -151,6 +178,7 @@ socket.on('connect', () => {
 	server.listen(0, '127.0.0.1');
 
 	resetMemory();
+	resetBackups();
 	resetScaling();
 
 	socket.emit('get-chunk', increaseScaling(), store);
