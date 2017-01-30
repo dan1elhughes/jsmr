@@ -33,6 +33,19 @@ module.exports = function () {
 		delete this.hosts[id];
 	};
 
+	this.registerBackup = id => data => {
+		if (id && data) {
+			let key = data.key;
+			let host = {
+				id,
+				address: this.hosts[id].address,
+				port: this.hosts[id].port,
+			};
+
+			this.unclaimedBackups.push({ key, host });
+		}
+	};
+
 	/**
 	 * Tells the controller that a certain host has a certain key.
 	 * Curried function.
@@ -43,9 +56,29 @@ module.exports = function () {
 	this.hasKey = id => key => {
 		if (id && key && this.hosts[id]) {
 			this.hosts[id].keys.push(key);
-			this.hosts[this.getLightestPeer()].backups.push(key);
 		}
 	};
+
+	this.claimBackups = id => {
+		let claimed = [];
+
+		this.unclaimedBackups = this.unclaimedBackups.filter(backup => {
+			if (backup.host.id !== id && this.hosts[id]) {
+				claimed.push({
+					key: backup.key,
+					host: backup.host
+				});
+				this.hosts[id].backups.push(backup.key);
+				return false;
+			}
+
+			return true;
+		});
+
+		return claimed;
+	};
+
+	this.unclaimedBackups = [];
 
 	/**
 	 * Returns the ID of the peer storing the least amount of data.
