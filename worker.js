@@ -188,6 +188,9 @@ p2p.on('connection', socket => {
 	socket.on('kvs-get', (key, respond) => {
 		respond(memory.filter(item => item.k === key));
 	});
+	socket.on('kvs-get-backup', (key, respond) => {
+		respond(backups.filter(item => item.k === key));
+	});
 });
 
 server.on('listening', () => {
