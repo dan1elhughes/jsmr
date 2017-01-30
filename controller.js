@@ -61,9 +61,15 @@ network.on('connection', socket => {
 					});
 				}
 			});
+			// BUG: If there are nodes currently working on
+			// reduces, this returns true and the results
+			// are written twice: once this time round,
+			// and again when those nodes finish their
+			// work.
 			if (reduceQueue.length() === 0) {
 				app.write(app.aggregate(results)).then(() => {
-					process.exit(0);
+					console.log('Written');
+					// process.exit(0);
 				});
 			}
 		}
