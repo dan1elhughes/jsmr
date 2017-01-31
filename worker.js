@@ -46,7 +46,7 @@ let store = value => {
 		}
 	}
 
-	if (components.backups) {
+	if (components.backups.length > 0) {
 		fetchBackups(components.backups);
 	}
 };
