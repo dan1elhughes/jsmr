@@ -54,6 +54,15 @@ network.on('connection', socket => {
 		} else if (data.action === 'reduce') {
 			console.log(`RDCE: ${JSON.stringify(data)}`);
 			data.results.forEach(result => {
+
+				results.forEach(r => {
+					if (r.key === result.key) {
+						r._remove = true;
+					}
+				});
+
+				results = results.filter(r => !r._remove);
+
 				if (app.filter(result)) {
 					results.push({
 						key: result.key.split('/')[1],
