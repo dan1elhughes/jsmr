@@ -45,14 +45,16 @@ network.on('connection', socket => {
 
 	socket.on('result', data => {
 		if (data.action === 'map') {
-			console.log(`MAPR: ${JSON.stringify(data)}`);
 
-			reduceQueue.push(data);
-			p2p.hasKey(socket.id)(data.key);
-			p2p.registerBackup(socket.id)(data);
+			console.log(`MAPR: Got ${data.keys.length} keys`);
+			data.keys.forEach(key => {
+				reduceQueue.push({ key });
+				p2p.hasKey(socket.id)(key);
+				// p2p.registerBackup(socket.id)(key);
+			});
 
 		} else if (data.action === 'reduce') {
-			console.log(`RDCE: ${JSON.stringify(data)}`);
+			console.log(`RDCE: Got ${data.results.length} results`);
 			data.results.forEach(result => {
 
 				results.forEach(r => {
@@ -64,12 +66,10 @@ network.on('connection', socket => {
 				results = results.filter(r => !r._remove);
 
 				if (app.filter(result)) {
-					results.push({
-						key: result.key.split('/')[1],
-						value: result.value
-					});
+					results.push(result);
 				}
 			});
+
 			// BUG: If there are nodes currently working on
 			// reduces, this returns true and the results
 			// are written twice: once this time round,

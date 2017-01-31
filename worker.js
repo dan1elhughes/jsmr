@@ -73,29 +73,30 @@ let map = components => {
 
 	let { data: dataArr, fn, debug } = components;
 
-	let length = dataArr.length;
-	let done = 0;
+	let results = [];
 
 	dataArr.forEach((data, i) => {
 		let output = () => {
-			log('MAP', `${i+1} of ${length} (${data})`, REWRITEABLE);
+			log('MAPR', `${i+1} of ${dataArr.length} (${data})`, REWRITEABLE);
 			let result = processInVM(fn, data);
 
 			if (typeof result !== 'undefined') {
-				let key = `map/${result.key}`;
-
-				memory.push({
-					k: key,
-					v: result
+				results.push({
+					key: result.key,
+					value: result.value
 				});
-
-				socket.emit('result', { key, action: 'map' });
-			} else {
-				console.log(`WARN: Got undefined processing ${data}`);
 			}
 
-			if (++done === length) {
+			if (results.length === dataArr.length) {
+
+				memory = memory.concat(results);
+
 				log(CLEAR); // Blank line to indicate map has finished
+				socket.emit('result', {
+					action: 'map',
+					keys: results.map(result => result.key)
+				});
+
 				socket.emit(`get-chunk`, increaseScaling(), store);
 			}
 		};
@@ -111,14 +112,10 @@ let map = components => {
 
 let getRemoteValue = (host, key) => new Promise(resolve => {
 	if (host.address === serverMeta.address && host.port === serverMeta.port) {
-		resolve(memory
-			.filter(item => item.k === key)
-			.map(item => item.v)
+		resolve(memory.filter(item => item.key === key)
 		);
 	} else {
-		network.connect(`http://${host.address}:${host.port}`).emit('kvs-get', key, values => {
-			resolve(values.map(value => value.v));
-		});
+		network.connect(`http://${host.address}:${host.port}`).emit('kvs-get', key, resolve);
 	}
 });
 
@@ -139,27 +136,32 @@ let reduce = components => {
 	log('RDCE', `Got ${components.data.length} keys`);
 	let { data, fn } = components;
 
-	let length = data.length;
-	let done = 0;
-
 	let results = [];
 
 	data.forEach(chunk => {
 		let { key, hosts } = chunk;
 
 		getRemoteValues({ key, hosts }).then(values => {
-			key = key.split('/')[1];
 			values = [].concat.apply([], values); // Converts a nested array into a flat array
 
 			log('RDCE', key, REWRITEABLE);
 			let value = processInVM(fn, values);
 			log('RDCE' , `${key} => ${value}`);
 
-			results.push({ key: `reduce/${key}`, value });
+			results.push({ key, value });
 
-			if (++done === length) {
-				socket.emit('result', { action: 'reduce', results });
-				socket.emit(`get-chunk`, increaseScaling(), store);
+			if (results.length === data.length) {
+
+				let output = () => {
+					socket.emit('result', { action: 'reduce', results });
+					socket.emit(`get-chunk`, increaseScaling(), store);
+				};
+
+				if (components.debug.slow) {
+					setTimeout(output, components.debug.slow);
+				} else {
+					output();
+				}
 			}
 		});
 	});
@@ -186,10 +188,10 @@ socket.on('connect', () => {
 
 p2p.on('connection', socket => {
 	socket.on('kvs-get', (key, respond) => {
-		respond(memory.filter(item => item.k === key));
+		respond(memory.filter(item => item.key === key));
 	});
 	socket.on('kvs-get-backup', (key, respond) => {
-		respond(backups.filter(item => item.k === key));
+		respond(backups.filter(item => item.key === key));
 	});
 });
 
