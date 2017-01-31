@@ -1,7 +1,7 @@
 const server = require('http').createServer();
 const p2p = require('socket.io').listen(server);
 const network = require('socket.io-client');
-const socket = network.connect('http://localhost:3000', { reconnect: true });
+const socket = network.connect('http://localhost:33000', { reconnect: true });
 const processInVM = require('./processInVM');
 const { print, CLEAR, REWRITEABLE } = require('./debug');
 
