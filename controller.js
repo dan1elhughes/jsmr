@@ -67,7 +67,14 @@ network.on('connection', socket => {
 			// and again when those nodes finish their
 			// work.
 			if (reduceQueue.length() === 0) {
-				app.write(app.aggregate(results)).then(() => {
+
+				let output = results;
+
+				if (app.aggregate) {
+					output = app.aggregate(output);
+				}
+
+				app.write(output).then(() => {
 					console.log('Written');
 					// process.exit(0);
 				});
