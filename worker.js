@@ -101,7 +101,7 @@ let map = components => {
 		};
 
 		if (debug.slow) {
-			setTimeout(output, 250 * i);
+			setTimeout(output, debug.slow * i);
 		} else {
 			output();
 		}

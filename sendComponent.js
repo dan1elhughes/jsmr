@@ -42,7 +42,7 @@ module.exports = (components) => (quantity, respond) => {
 	});
 
 	if (debug.slow) {
-		setTimeout(output, 500);
+		setTimeout(output, debug.slow);
 	} else {
 		output();
 	}
