@@ -2,7 +2,7 @@ const console = require('util');
 
 module.exports = (components) => (quantity, respond) => {
 
-	let { map, combine, reduce, mapQueue, reduceQueue, socket, p2p, debug } = components;
+	let { map, combine, reduce, ideal_time, mapQueue, reduceQueue, socket, p2p, debug } = components;
 
 	console.log(`SEND: ${socket} (${quantity} of M${mapQueue.length()} R${reduceQueue.length()})`);
 
@@ -42,6 +42,7 @@ module.exports = (components) => (quantity, respond) => {
 		data,
 		debug,
 		fn,
+		ideal_time,
 	});
 
 	if (debug.slow) {

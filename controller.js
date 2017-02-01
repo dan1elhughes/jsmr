@@ -38,6 +38,7 @@ network.on('connection', socket => {
 		map: app.map,
 		combine: app.combine,
 		reduce: app.reduce,
+		ideal_time: app.ideal_time,
 		mapQueue,
 		reduceQueue,
 		socket: socket.id,

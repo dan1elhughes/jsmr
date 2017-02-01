@@ -21,12 +21,18 @@ let resetMemory = () => memory = [];
 let resetBackups = () => backups = [];
 
 let CHUNKSIZE = 1;
+let IDEAL_TIME = 500;
 let resetScaling = () => CHUNKSIZE = 1;
-let increaseScaling = () => CHUNKSIZE++;
+let increaseScaling = () => CHUNKSIZE += 1;
+let decreaseScaling = () => CHUNKSIZE -= 1;
 let log = print(true);
 
 let store = value => {
 	log = print(value.debug.print);
+
+	if (value.ideal_time) {
+		IDEAL_TIME = value.ideal_time;
+	}
 
 	let components = {
 		action: value.action,
@@ -88,6 +94,8 @@ let map = components => {
 
 	let results = [];
 
+	let start = new Date();
+
 	dataArr.forEach((data, i) => {
 		let output = () => {
 			log('MAPR', `${i+1} of ${dataArr.length} (${data})`, REWRITEABLE);
@@ -131,7 +139,15 @@ let map = components => {
 					keys: results.map(result => result.key)
 				});
 
-				socket.emit(`get-chunk`, increaseScaling(), store);
+				socket.emit(`get-chunk`, CHUNKSIZE, store);
+
+				let timeTaken = new Date() - start;
+
+				if (timeTaken > IDEAL_TIME) {
+					decreaseScaling();
+				} else {
+					increaseScaling();
+				}
 			}
 		};
 
@@ -141,6 +157,7 @@ let map = components => {
 			output();
 		}
 	});
+
 
 };
 
@@ -175,35 +192,46 @@ let reduce = components => {
 
 	let results = [];
 
-	data.forEach(chunk => {
-		let { key, hosts } = chunk;
+	let start = new Date();
 
-		log('RDCE', `Processing ${key}`);
+	data.forEach((chunk, i) => {
+		let output = () => {
 
-		getRemoteValues({ key, hosts }).then(values => {
-			values = [].concat.apply([], values); // Converts a nested array into a flat array
+			let { key, hosts } = chunk;
 
-			log('RDCE', key, REWRITEABLE);
-			let value = processInVM(fn, values);
-			log('RDCE' , `${key} => ${value}`);
+			getRemoteValues({ key, hosts }).then(values => {
+				values = [].concat.apply([], values); // Converts a nested array into a flat array
 
-			results.push({ key, value });
+				let value = processInVM(fn, values);
+				results.push({ key, value });
 
-			if (results.length === data.length) {
+				log('RDCE', `${i+1} of ${components.data.length} (${key} => ${value})`, REWRITEABLE);
 
-				let output = () => {
+				if (results.length === data.length) {
+
+					log(CLEAR);
+
 					socket.emit('result', { action: 'reduce', results });
-					socket.emit(`get-chunk`, increaseScaling(), store);
-				};
+					socket.emit(`get-chunk`, CHUNKSIZE, store);
 
-				if (components.debug.slow) {
-					setTimeout(output, components.debug.slow);
-				} else {
-					output();
+					let timeTaken = new Date() - start;
+
+					if (timeTaken > IDEAL_TIME) {
+						decreaseScaling();
+					} else {
+						increaseScaling();
+					}
 				}
-			}
-		});
+			});
+		};
+
+		if (components.debug.slow) {
+			setTimeout(output, components.debug.slow * i);
+		} else {
+			output();
+		}
 	});
+
 };
 
 socket.on('disconnect', () => {
@@ -222,7 +250,7 @@ socket.on('connect', () => {
 	resetBackups();
 	resetScaling();
 
-	socket.emit('get-chunk', increaseScaling(), store);
+	socket.emit('get-chunk', CHUNKSIZE, store);
 });
 
 p2p.on('connection', socket => {
