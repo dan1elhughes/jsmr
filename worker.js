@@ -11,6 +11,7 @@ const MY_IP = getIP();
 const CONTROLLER_PORT = process.env.CONTROLLER_PORT || 33000;
 const CONTROLLER_IP = process.env.CONTROLLER_IP || '127.0.0.1';
 const socket = network.connect(`http://${CONTROLLER_IP}:${CONTROLLER_PORT}`, { reconnect: true });
+console.log(`Connecting to http://${CONTROLLER_IP}:${CONTROLLER_PORT}`);
 
 let serverMeta;
 
