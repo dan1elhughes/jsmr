@@ -1,6 +1,9 @@
 # Generated output data
 output/*
 
+# Environment variables
+.env
+
 #### Stock .gitignore follows ####
 
 # Logs
