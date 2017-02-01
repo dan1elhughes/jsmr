@@ -1,12 +1,13 @@
 const log = require('single-line-log')(process.stdout);
-const CLEAR = 1, REWRITEABLE = 2;
+const CLEAR = 1, REWRITEABLE = 2, FORCE = 3;
 
 module.exports = {
 	CLEAR,
 	REWRITEABLE,
+	FORCE,
 
 	print: enabled => (tag, val, flag) => {
-		if (enabled) {
+		if (enabled || flag === FORCE) {
 			if (tag === CLEAR) {
 				console.log('');
 				return;

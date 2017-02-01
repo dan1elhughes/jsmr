@@ -2,7 +2,7 @@ const server = require('http').createServer();
 const p2p = require('socket.io').listen(server);
 const network = require('socket.io-client');
 const processInVM = require('./processInVM');
-const { print, CLEAR, REWRITEABLE } = require('./debug');
+const { print, CLEAR, REWRITEABLE, FORCE } = require('./debug');
 require('dotenv').config();
 
 const getIP = require('./getIP');
@@ -185,11 +185,11 @@ socket.on('disconnect', () => {
 	resetBackups();
 	resetScaling();
 
-	log('DISC', 'Disconnected');
+	log('DISC', 'Disconnected', FORCE);
 });
 
 socket.on('connect', () => {
-	log('CONN', 'Connected');
+	log('CONN', 'Connected', FORCE);
 	server.listen(0, '0.0.0.0');
 
 	resetMemory();
