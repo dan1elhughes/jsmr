@@ -115,7 +115,7 @@ let map = components => {
 };
 
 let getRemoteValue = (host, key) => new Promise(resolve => {
-	if (host.address === serverMeta.address && host.port === serverMeta.port) {
+	if (host.address === MY_IP && host.port === serverMeta.port) {
 		resolve(memory.filter(item => item.key === key)
 		);
 	} else {
@@ -182,7 +182,7 @@ socket.on('disconnect', () => {
 
 socket.on('connect', () => {
 	log('CONN', 'Connected');
-	server.listen(0, MY_IP);
+	server.listen(0, '0.0.0.0');
 
 	resetMemory();
 	resetBackups();
@@ -203,5 +203,9 @@ p2p.on('connection', socket => {
 
 server.on('listening', () => {
 	serverMeta = server.address();
-	socket.emit('p2p-register', serverMeta);
+
+	socket.emit('p2p-register', {
+		address: MY_IP,
+		port: serverMeta.port
+	});
 });
