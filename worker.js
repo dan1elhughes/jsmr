@@ -1,9 +1,12 @@
 const server = require('http').createServer();
 const p2p = require('socket.io').listen(server);
 const network = require('socket.io-client');
-const socket = network.connect('http://localhost:33000', { reconnect: true });
 const processInVM = require('./processInVM');
 const { print, CLEAR, REWRITEABLE } = require('./debug');
+require('dotenv').config();
+const CONTROLLER_PORT = process.env.CONTROLLER_PORT || 33000;
+const CONTROLLER_IP = process.env.CONTROLLER_IP || '127.0.0.1';
+const socket = network.connect(`http://${CONTROLLER_IP}:${CONTROLLER_PORT}`, { reconnect: true });
 
 let serverMeta;
 

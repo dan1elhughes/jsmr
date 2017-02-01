@@ -5,7 +5,13 @@ const sendComponent = require('./sendComponent');
 const app = require('./wordcount/app');
 const Queue = require('./Queue');
 const P2P = require('./p2p');
+const dotenv = require('dotenv');
 const { print, CLEAR, REWRITEABLE } = require('./debug');
+
+// Load environment variables
+dotenv.config();
+
+let port = process.env.CONTROLLER_PORT || 33000;
 
 let log = print(app.debug.print);
 
@@ -59,6 +65,7 @@ network.on('connection', socket => {
 
 				results.forEach(r => {
 					if (r.key === result.key) {
+						console.log(`Overwriting key (${result.key})`);
 						r._remove = true;
 					}
 				});
@@ -102,4 +109,4 @@ network.on('connection', socket => {
 });
 
 server.on('listening', () => console.log('Listening'));
-server.listen(33000, '0.0.0.0');
+server.listen(port, '0.0.0.0');
