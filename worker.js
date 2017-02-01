@@ -3,6 +3,7 @@ const p2p = require('socket.io').listen(server);
 const network = require('socket.io-client');
 const processInVM = require('./processInVM');
 const { print, CLEAR, REWRITEABLE, FORCE } = require('./debug');
+let log = print(true);
 require('dotenv').config();
 
 const getIP = require('./getIP');
@@ -10,8 +11,19 @@ const MY_IP = getIP();
 
 const CONTROLLER_PORT = process.env.CONTROLLER_PORT || 33000;
 const CONTROLLER_IP = process.env.CONTROLLER_IP || '127.0.0.1';
-const socket = network.connect(`http://${CONTROLLER_IP}:${CONTROLLER_PORT}`, { reconnect: true });
-console.log(`Connecting to http://${CONTROLLER_IP}:${CONTROLLER_PORT}`);
+
+const socket = network.connect(`http://${CONTROLLER_IP}:${CONTROLLER_PORT}`, {
+	reconnect: true,
+	timeout: 2000,
+});
+socket.io.backoff.factor = 1;
+socket.io.backoff.jitter = 0;
+socket.io.backoff.ms = 1000;
+
+log(`CONN`, `Connecting to ${CONTROLLER_IP}:${CONTROLLER_PORT}`);
+socket.on('reconnect_attempt', (n) => {
+	log(`CONN`, `Connecting to ${CONTROLLER_IP}:${CONTROLLER_PORT} (Retry ${n})`);
+});
 
 let serverMeta;
 
@@ -25,7 +37,6 @@ let IDEAL_TIME = 500;
 let resetScaling = () => CHUNKSIZE = 1;
 let increaseScaling = () => CHUNKSIZE += 1;
 let decreaseScaling = () => CHUNKSIZE -= 1;
-let log = print(true);
 
 let store = value => {
 	log = print(value.debug.print);
