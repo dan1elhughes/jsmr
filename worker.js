@@ -4,9 +4,12 @@ const network = require('socket.io-client');
 const processInVM = require('./processInVM');
 const { print, CLEAR, REWRITEABLE } = require('./debug');
 require('dotenv').config();
+
+const getIP = require('./getIP');
+const MY_IP = getIP();
+
 const CONTROLLER_PORT = process.env.CONTROLLER_PORT || 33000;
 const CONTROLLER_IP = process.env.CONTROLLER_IP || '127.0.0.1';
-const MY_IP = process.env.MY_IP || '127.0.0.1';
 const socket = network.connect(`http://${CONTROLLER_IP}:${CONTROLLER_PORT}`, { reconnect: true });
 
 let serverMeta;
