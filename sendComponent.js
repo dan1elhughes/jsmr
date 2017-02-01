@@ -2,7 +2,7 @@ const console = require('util');
 
 module.exports = (components) => (quantity, respond) => {
 
-	let { map, reduce, mapQueue, reduceQueue, socket, p2p, debug } = components;
+	let { map, combine, reduce, mapQueue, reduceQueue, socket, p2p, debug } = components;
 
 	console.log(`SEND: ${socket} (${quantity} of M${mapQueue.length()} R${reduceQueue.length()})`);
 
@@ -10,6 +10,9 @@ module.exports = (components) => (quantity, respond) => {
 
 	if (mapQueue.length() > 0) {
 		fn = map.toString();
+		if (combine) {
+			fn += '/|/' + combine.toString();
+		}
 		data = mapQueue.pop(quantity);
 		action = 'map';
 	} else if (reduceQueue.length() > 0) {

@@ -36,6 +36,7 @@ network.on('connection', socket => {
 
 	socket.on('get-chunk', sendComponent({
 		map: app.map,
+		combine: app.combine,
 		reduce: app.reduce,
 		mapQueue,
 		reduceQueue,

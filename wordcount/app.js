@@ -23,6 +23,8 @@ module.exports = {
 
 	reduce: collection => collection.reduce((sum, word) => sum + word.value, 0),
 
+	combine: collection => collection.reduce((sum, word) => sum + word.value, 0),
+
 	filter: word => word.value > 1,
 
 	aggregate: collection => collection

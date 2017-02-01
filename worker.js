@@ -80,6 +80,11 @@ let fetchBackups = keys => {
 let map = components => {
 
 	let { data: dataArr, fn, debug } = components;
+	let combine;
+
+	if (fn.indexOf('/|/') > -1) {
+		[ fn, combine ] = fn.split('/|/');
+	}
 
 	let results = [];
 
@@ -97,7 +102,28 @@ let map = components => {
 
 			if (results.length === dataArr.length) {
 
-				memory = memory.concat(results);
+				if (combine) {
+					results.forEach(result => {
+						let existingResults = [];
+						memory = memory.filter(item => {
+							if (item.key === result.key) {
+								existingResults.push(item);
+								return false;
+							} else {
+								return true;
+							}
+						});
+
+						let arr = existingResults.concat(result);
+						let value = processInVM(combine, arr);
+						memory.push({
+							key: result.key,
+							value
+						});
+					});
+				} else {
+					memory = memory.concat(results);
+				}
 
 				log(CLEAR); // Blank line to indicate map has finished
 				socket.emit('result', {
