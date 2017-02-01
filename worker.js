@@ -119,6 +119,7 @@ let getRemoteValue = (host, key) => new Promise(resolve => {
 		resolve(memory.filter(item => item.key === key)
 		);
 	} else {
+		log(`GRMV`, `Requesting ${key} from ${host.address}:${host.port}`);
 		network.connect(`http://${host.address}:${host.port}`).emit('kvs-get', key, resolve);
 	}
 });
@@ -192,6 +193,7 @@ socket.on('connect', () => {
 
 p2p.on('connection', socket => {
 	socket.on('kvs-get', (key, respond) => {
+		log(`KSVG`, `Responding to request for ${key}`);
 		respond(memory.filter(item => item.key === key));
 	});
 	socket.on('kvs-get-backup', (key, respond) => {
