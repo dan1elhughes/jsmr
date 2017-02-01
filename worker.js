@@ -195,8 +195,10 @@ socket.on('connect', () => {
 
 p2p.on('connection', socket => {
 	socket.on('kvs-get', (key, respond) => {
-		log(`KSVG`, `Responding to request for ${key}`);
-		respond(memory.filter(item => item.key === key));
+		let result = memory.filter(item => item.key === key);
+		log(`KSVG`, `Responding to request for ${key}: ${JSON.stringify(result)}`);
+		respond(result);
+		socket.disconnect();
 	});
 	socket.on('kvs-get-backup', (key, respond) => {
 		respond(backups.filter(item => item.key === key));
