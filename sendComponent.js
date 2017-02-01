@@ -4,7 +4,7 @@ module.exports = (components) => (quantity, respond) => {
 
 	let { map, reduce, mapQueue, reduceQueue, socket, p2p, debug } = components;
 
-	console.log(`SEND: ${socket} (${quantity})`);
+	console.log(`SEND: ${socket} (${quantity} of M${mapQueue.length()} R${reduceQueue.length()})`);
 
 	let fn, data, action;
 
