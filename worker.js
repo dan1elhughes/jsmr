@@ -6,6 +6,7 @@ const { print, CLEAR, REWRITEABLE } = require('./debug');
 require('dotenv').config();
 const CONTROLLER_PORT = process.env.CONTROLLER_PORT || 33000;
 const CONTROLLER_IP = process.env.CONTROLLER_IP || '127.0.0.1';
+const MY_IP = process.env.MY_IP || '127.0.0.1';
 const socket = network.connect(`http://${CONTROLLER_IP}:${CONTROLLER_PORT}`, { reconnect: true });
 
 let serverMeta;
@@ -180,7 +181,7 @@ socket.on('disconnect', () => {
 
 socket.on('connect', () => {
 	log('CONN', 'Connected');
-	server.listen(0, '127.0.0.1');
+	server.listen(0, MY_IP);
 
 	resetMemory();
 	resetBackups();
