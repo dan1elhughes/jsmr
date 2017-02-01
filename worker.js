@@ -116,11 +116,13 @@ let map = components => {
 
 let getRemoteValue = (host, key) => new Promise(resolve => {
 	if (host.address === MY_IP && host.port === serverMeta.port) {
-		resolve(memory.filter(item => item.key === key)
-		);
+		resolve(memory.filter(item => item.key === key));
 	} else {
 		log(`GRMV`, `Requesting ${key} from ${host.address}:${host.port}`);
-		network.connect(`http://${host.address}:${host.port}`).emit('kvs-get', key, resolve);
+		network.connect(`http://${host.address}:${host.port}`).emit('kvs-get', key, value => {
+			log(`GRMV`, `Got ${key} from ${host.address}:${host.port}`);
+			return resolve(value);
+		});
 	}
 });
 
