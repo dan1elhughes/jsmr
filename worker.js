@@ -148,6 +148,8 @@ let reduce = components => {
 	data.forEach(chunk => {
 		let { key, hosts } = chunk;
 
+		log('RDCE', `Processing ${key}`);
+
 		getRemoteValues({ key, hosts }).then(values => {
 			values = [].concat.apply([], values); // Converts a nested array into a flat array
 
