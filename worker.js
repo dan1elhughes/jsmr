@@ -177,8 +177,23 @@ let getRemoteValue = (host, key) => new Promise(resolve => {
 		resolve(memory.filter(item => item.key === key));
 	} else {
 		log(`GRMV`, `Requesting ${key} from ${host.address}:${host.port}`);
-		network.connect(`http://${host.address}:${host.port}`).emit('kvs-get', key, value => {
+
+		let p2psocket = network.connect(`http://${host.address}:${host.port}`, {
+			reconnect: true,
+			timeout: 1000,
+		});
+		p2psocket.io.backoff.factor = 1;
+		p2psocket.io.backoff.jitter = 0;
+		p2psocket.io.backoff.ms = 0;
+
+		p2psocket.on('reconnect_attempt', (n) => {
+			// BUG These sockets remain alive and trying to connect. Store map of connections and re-use
+			log(`CONN`, `Connecting to ${host.address}:${host.port} (Retry ${n})`);
+		});
+
+		p2psocket.emit('kvs-get', key, value => {
 			log(`GRMV`, `Got ${key} from ${host.address}:${host.port}`);
+			p2psocket.disconnect();
 			return resolve(value);
 		});
 	}
@@ -225,6 +240,7 @@ let reduce = components => {
 					socket.emit('result', { action: 'reduce', results });
 					socket.emit(`get-chunk`, CHUNKSIZE, store);
 
+					// BUG: Scale this properly
 					let timeTaken = new Date() - start;
 
 					if (timeTaken > IDEAL_TIME) {
