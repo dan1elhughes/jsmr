@@ -110,5 +110,5 @@ network.on('connection', socket => {
 	});
 });
 
-server.on('listening', () => console.log('Listening'));
+server.on('listening', () => console.log(`Listening at ${port}`));
 server.listen(port, '0.0.0.0');
