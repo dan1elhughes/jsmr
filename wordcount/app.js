@@ -6,7 +6,7 @@ module.exports = {
 		// slow: 500
 	},
 
-	load: () => fs.createReadStream('wordcount/huge.txt', {
+	load: () => fs.createReadStream('wordcount/large.txt', {
 		encoding: 'UTF-8'
 	}),
 
