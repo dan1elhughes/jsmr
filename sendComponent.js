@@ -1,10 +1,16 @@
 const console = require('util');
 
+let timings = {};
+
 module.exports = (components) => (quantity, respond) => {
 
 	let { map, combine, reduce, ideal_time, mapQueue, reduceQueue, socket, p2p, debug } = components;
 
-	console.log(`SEND: ${socket} (${quantity} of M${mapQueue.length()} R${reduceQueue.length()})`);
+	if (typeof ideal_time === 'undefined') {
+		ideal_time = 500;
+	}
+
+	console.log(`SEND: ${socket} (M${mapQueue.length()} R${reduceQueue.length()})`);
 
 	let fn, data, action;
 
@@ -15,10 +21,30 @@ module.exports = (components) => (quantity, respond) => {
 		}
 		data = mapQueue.pop(quantity);
 		action = 'map';
+
+		timings[socket] = {
+			time: new Date(),
+			count: 1
+		};
+
 	} else if (reduceQueue.length() > 0) {
 		fn = reduce.toString();
 		data = [];
-		while (quantity-- > 0) {
+
+		let last = timings[socket].time;
+		let now = new Date();
+
+		if (now - last > ideal_time && timings[socket].count > 1) {
+			timings[socket].count--;
+		} else {
+			timings[socket].count++;
+		}
+
+		timings[socket].time = new Date();
+
+		let i = timings[socket].count;
+
+		while (i-- > 0) {
 			let key = reduceQueue.accumulate();
 			if (key) {
 				data.push({
@@ -28,6 +54,7 @@ module.exports = (components) => (quantity, respond) => {
 			}
 		}
 		action = 'reduce';
+
 	} else {
 		fn = (() => {}).toString();
 		data = [];

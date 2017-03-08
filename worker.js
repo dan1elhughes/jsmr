@@ -97,6 +97,11 @@ let fetchBackups = keys => {
 let map = components => {
 
 	let { data: dataArr, fn, debug } = components;
+
+	if (dataArr.length === 1) {
+		resetScaling();
+	}
+
 	let combine;
 
 	if (fn.indexOf('/|/') > -1) {
@@ -108,67 +113,69 @@ let map = components => {
 	let start = new Date();
 
 	dataArr.forEach((data, i) => {
-		let output = () => {
-			log('MAPR', `${i+1} of ${dataArr.length} (${data})`, REWRITEABLE);
-			let result = processInVM(fn, data);
+		log('MAPR', `${i+1} of ${dataArr.length} (${JSON.stringify(data)})`, REWRITEABLE);
+		let result = processInVM(fn, data);
 
-			if (typeof result !== 'undefined') {
-				results.push({
-					key: result.key,
-					value: result.value
-				});
-			}
-
-			if (results.length === dataArr.length) {
-
-				if (combine) {
-					results.forEach(result => {
-						let existingResults = [];
-						memory = memory.filter(item => {
-							if (item.key === result.key) {
-								existingResults.push(item);
-								return false;
-							} else {
-								return true;
-							}
-						});
-
-						let arr = existingResults.concat(result);
-						let value = processInVM(combine, arr);
-						memory.push({
-							key: result.key,
-							value
-						});
+		if (typeof result !== 'undefined') {
+			if (Array.isArray(result)) {
+				result.forEach(r => {
+					results.push({
+						key: r.key,
+						value: r.value
 					});
-				} else {
-					memory = memory.concat(results);
-				}
-
-				log(CLEAR); // Blank line to indicate map has finished
-				socket.emit('result', {
-					action: 'map',
-					keys: results.map(result => result.key)
 				});
-
-				socket.emit(`get-chunk`, CHUNKSIZE, store);
-
-				let timeTaken = new Date() - start;
-
-				if (timeTaken > IDEAL_TIME) {
-					decreaseScaling();
-				} else {
-					increaseScaling();
-				}
 			}
-		};
-
-		if (debug.slow) {
-			setTimeout(output, debug.slow * i);
-		} else {
-			output();
+			results.push({
+				key: result.key,
+				value: result.value
+			});
 		}
 	});
 
+	if (combine) {
+		results.forEach(result => {
+			let existingResults = [];
+			memory = memory.filter(item => {
+				if (item.key === result.key) {
+					existingResults.push(item);
+					return false;
+				} else {
+					return true;
+				}
+			});
+
+			let arr = existingResults.concat(result);
+			let value = processInVM(combine, arr);
+			memory.push({
+				key: result.key,
+				value
+			});
+		});
+	} else {
+		memory = memory.concat(results);
+	}
+
+	log(CLEAR); // Blank line to indicate map has finished
+	socket.emit('result', {
+		action: 'map',
+		keys: results.map(result => result.key)
+	});
+
+	let getMore = () => socket.emit(`get-chunk`, CHUNKSIZE, store);
+
+	let timeTaken = new Date() - start;
+
+	if (timeTaken > IDEAL_TIME) {
+		decreaseScaling();
+	} else {
+		increaseScaling();
+	}
+
+	if (debug.slow) {
+		setTimeout(getMore, debug.slow);
+	} else {
+		getMore();
+	}
 
 };
 
@@ -211,7 +218,13 @@ let getRemoteValues = ({ key, hosts }) => Promise.all(
 	)
 );
 
+let firstReduce = true;
 let reduce = components => {
+
+	if (firstReduce) {
+		resetScaling();
+		firstReduce = false;
+	}
 
 	log('RDCE', `Got ${components.data.length} keys`);
 	let { data, fn } = components;
