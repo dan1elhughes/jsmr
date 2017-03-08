@@ -1,3 +1,3 @@
 cd ..
-"C:/Program Files/nodejs/npm" run worker
+"C:/Program Files/nodejs/node" worker.js
 pause

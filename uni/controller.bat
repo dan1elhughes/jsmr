@@ -1,3 +1,3 @@
 cd ..
-"C:/Program Files/nodejs/npm" run controller
+"C:/Program Files/nodejs/node" controller.js
 pause
