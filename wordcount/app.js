@@ -6,6 +6,10 @@ module.exports = {
 		// slow: 500
 	},
 
+	// huge.txt: 114,242 words
+	// large.txt: 18,724 words
+	// medium.txt: 1,494 words
+	// short.txt: 49 words
 	load: () => fs.createReadStream('wordcount/large.txt', {
 		encoding: 'UTF-8'
 	}),
