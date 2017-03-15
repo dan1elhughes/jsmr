@@ -39,6 +39,6 @@ module.exports = {
 	},
 
 	write: result => new Promise(resolve => {
-		fs.writeFile('./output/mutualfriends.csv', JSON.stringify(result, null, '\t'), 'utf8', resolve);
+		fs.writeFile('./output/mutualfriends.json', JSON.stringify(result, null, '\t'), 'utf8', resolve);
 	})
 };
