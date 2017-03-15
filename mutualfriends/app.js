@@ -34,7 +34,7 @@ module.exports = {
 		};
 
 		let values = collection.map(_ => _.value);
-		let intersection = intersect(values[0], values[1]);
+		let intersection = intersect(values[0], values[1]).join(",");
 		return intersection;
 	},
 
