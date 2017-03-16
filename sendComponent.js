@@ -10,7 +10,7 @@ module.exports = (components) => (quantity, respond) => {
 		ideal_time = 500;
 	}
 
-	console.log(`SEND: ${socket} (M${mapQueue.length()} R${reduceQueue.length()})`);
+	console.log(`SEND: ${socket} (M${mapQueue.length()} R${reduceQueue.length()} C${Object.keys(p2p.hosts).length})`);
 
 	let fn, data, action;
 
