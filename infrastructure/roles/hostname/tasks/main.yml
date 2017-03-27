@@ -5,9 +5,6 @@
     name="{{ hostname }}"
 
 - name: Set etc hostname
-  lineinfile:
-    dest="/etc/hosts"
-    regexp="^127.0.1.1"
-    line="127.0.1.1 {{ hostname }}"
-    state="present"
-    backrefs="yes"
+  template:
+    src: hosts
+    dest: /etc/hosts
