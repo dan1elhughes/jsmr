@@ -26,16 +26,14 @@
     name: pm2
     global: yes
 
-- name: Start PM2
-  command: "pm2 list"
+- name: Start worker process
+  command: "pm2 start /opt/app/worker.js -i {{ ansible_processor_vcpus }}"
+  become_user: "{{ user }}"
   args:
-    creates: "/home/{{ user }}/.pm2/pub.sock"
+    chdir: "/opt/app"
+    creates: "/home/{{ user }}/.pm2/pids/worker-0.pid"
 
 - name: Enable PM2 at boot
-  command: "pm2 startup -u pi"
+  command: "pm2 startup systemd -u {{ user }} --hp /home/{{ user }}"
   args:
-    creates: "/etc/systemd/system/pm2-pi.service"
-
-- name: Start worker process
-  command: "pm2 start /opt/app/process.yml"
-  become_user: "{{ user }}"
+    creates: "/etc/systemd/system/pm2-{{ user }}.service"
