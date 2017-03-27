@@ -4,6 +4,9 @@ output/*
 # Vagrant box files
 .vagrant/
 
+# Ansible progress files
+*.retry
+
 # Environment variables
 .env
 
