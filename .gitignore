@@ -1,6 +1,9 @@
 # Generated output data
 output/*
 
+# Vagrant box files
+.vagrant/
+
 # Environment variables
 .env
 
