@@ -1,0 +1,13 @@
+---
+
+- name: Set hostname
+  hostname:
+    name="{{ hostname }}"
+
+- name: Set etc hostname
+  lineinfile:
+    dest="/etc/hosts"
+    regexp="^127.0.1.1"
+    line="127.0.1.1 {{ hostname }}"
+    state="present"
+    backrefs="yes"

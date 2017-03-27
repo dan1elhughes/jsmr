@@ -1,0 +1,35 @@
+---
+- name: Ensure user account exists
+  user:
+    name='{{ user }}'
+    password='{{ crypted_password }}'
+    shell='/bin/bash'
+    groups='sudo'
+    append='yes'
+    state='present'
+    update_password='on_create'
+
+- name: Create SSH directory
+  file:
+    path='/home/{{user}}/.ssh'
+    state='directory'
+    mode='0700'
+    owner='{{user}}'
+    group='{{user}}'
+
+- name: Add SSH public key
+  copy:
+    src='/home/ubuntu/.ssh/id_rsa.pub'
+    dest='/home/{{user}}/.ssh/authorized_keys'
+    owner='{{user}}'
+    group='{{user}}'
+    mode='0644'
+
+- name: Disable root SSH login
+  lineinfile:
+    dest='/etc/ssh/sshd_config'
+    regexp='^PermitRootLogin'
+    line='PermitRootLogin no'
+    backrefs='yes'
+  notify:
+    - Restart SSH

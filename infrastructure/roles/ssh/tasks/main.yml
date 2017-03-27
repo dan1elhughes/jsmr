@@ -1,0 +1,37 @@
+---
+- name: Disable SSH password login
+  lineinfile:
+    dest="/etc/ssh/sshd_config"
+    regexp="^PasswordAuthentication"
+    line="PasswordAuthentication no"
+    state="present"
+    backrefs="yes"
+  notify:
+    - Restart SSH
+
+- name: Disable SSH challenge response auth
+  lineinfile:
+    dest="/etc/ssh/sshd_config"
+    regexp="^ChallengeResponseAuthentication"
+    line="ChallengeResponseAuthentication no"
+    state="present"
+    backrefs="yes"
+  notify:
+    - Restart SSH
+
+- name: Disable SSH PAM
+  lineinfile:
+    dest="/etc/ssh/sshd_config"
+    regexp="^UsePAM"
+    line="UsePAM no"
+    state="present"
+    backrefs="yes"
+  notify:
+    - Restart SSH
+
+- name: Remove root authorized keys
+  file:
+    path="/root/.ssh/authorized_keys"
+    state="absent"
+  notify:
+    - Restart SSH

@@ -1,0 +1,41 @@
+---
+
+- name: Copy deploy key (read only access)
+  copy:
+    src='id_rsa'
+    dest='/root/.ssh/id_rsa'
+    mode='0600'
+
+- name: Clone application
+  git:
+    repo: ssh://git@github.com/dan1elhughes/fyp.git
+    dest: /opt/app
+    accept_hostkey: True
+
+- name: Copy environment file
+  copy:
+    src='/vagrant/.env'
+    dest='/opt/app/.env'
+
+- name: Install packages
+  npm:
+    path: /opt/app
+
+- name: Install PM2 package
+  npm:
+    name: pm2
+    global: yes
+
+- name: Start PM2
+  command: "pm2 list"
+  args:
+    creates: "/home/{{ user }}/.pm2/pub.sock"
+
+- name: Enable PM2 at boot
+  command: "pm2 startup -u pi"
+  args:
+    creates: "/etc/systemd/system/pm2-pi.service"
+
+- name: Start worker process
+  command: "pm2 start /opt/app/process.yml"
+  become_user: "{{ user }}"

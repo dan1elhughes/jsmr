@@ -1,0 +1,17 @@
+---
+
+- name: Fetch node setup script
+  get_url:
+    url: https://deb.nodesource.com/setup_6.x
+    dest: "/home/{{ user }}/setup.sh"
+    checksum: sha256:cd91db1284e8ad1bbd065083a6b2239ba1ba8a99031df7493f92a5a3423d15d2
+
+- name: Execute Node preparation installer
+  command: "sh /home/{{ user }}/setup.sh"
+  args:
+     creates: "/etc/apt/sources.list.d/nodesource.list"
+
+- name: Install NodeJS and NPM
+  apt:
+    name="nodejs"
+    state="latest"
