@@ -84,26 +84,35 @@ describe('Queue', () => {
 	describe('.pull()', () => {
 		it('does nothing with no index given', () => {
 			let q = new Queue([1, 2, 3]);
-			let result = q.pull();
 
-			assert.isUndefined(result);
+			q.pull();
+
 			assert.deepEqual(q.queue, [1, 2, 3]);
 		});
 
 		it('does nothing on an empty array', () => {
 			let q = new Queue();
-			let result = q.pull(0);
 
-			assert.isUndefined(result);
+			q.pull(0);
+			q.pull(true);
+
 			assert.deepEqual(q.queue, []);
 		});
 
-		it('removes and return an element at the given index', () => {
-			let q = new Queue([1, 2, 3]);
-			let result = q.pull(1);
+		it('removes an element at the given index', () => {
+			let q = new Queue();
 
-			assert.equal(result, 2);
-			assert.deepEqual(q.queue, [1, 3]);
+			q.push({ key: 1 });
+			q.push({ key: 2 });
+			q.push({ key: 3 });
+
+			q.pull(1);
+			q.pull(true);
+
+			assert.deepEqual(q.queue, [
+				{ key: 1},
+				{ key: 3},
+			]);
 		});
 	});
 

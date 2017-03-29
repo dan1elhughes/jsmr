@@ -7,7 +7,9 @@ module.exports = function (data) {
 	 * @return {Number} The new length of the queue.
 	 */
 	this.push = value => {
-		this.queue.push(value);
+		if (typeof value !== 'undefined') {
+			this.queue.push(value);
+		}
 	};
 
 	/**
@@ -40,7 +42,6 @@ module.exports = function (data) {
 	/**
 	 * Removes a specific item from the queue
 	 * @param  {Number} i Index of the item to remove
-	 * @return {Element} The element
 	 */
 	this.pull = i => {
 		if (typeof i === 'undefined') {
@@ -52,7 +53,9 @@ module.exports = function (data) {
 			return;
 		}
 
-		this.queue[i]._expired = true;
+		if (typeof this.queue[i] !== 'undefined') {
+			this.queue[i]._expired = true;
+		}
 	};
 
 	/**
