@@ -198,7 +198,13 @@ let connectToPeer = uri => new Promise(resolve => {
 		socket.io.backoff.jitter = 0;
 		socket.io.backoff.ms = 0;
 
-		socket.on('reconnect_attempt', n => log(`CONN`, `Connecting to ${uri} (Retry ${n})`));
+		socket.on('reconnect_attempt', n => {
+			log(`CONN`, `Connecting to ${uri} (Retry ${n})`);
+			if (n > 10) {
+				log(`CONN`, `Unable to connect! Abandoning...`);
+				socket.disconnect();
+			}
+		});
 
 		socket.on('connect', () => {
 			socket.emit('_ping', response => {
