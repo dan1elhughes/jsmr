@@ -1,23 +1,23 @@
 ---
 
-- name: Set up user account and secure SSH
+- name: Prerequisite Python installation
   become: yes
   any_errors_fatal: yes
   hosts: all
   gather_facts: no
+  tags: pre
   pre_tasks:
      - name: 'Install python'
        changed_when: false
        raw: sudo apt-get -y install python-minimal
-  roles:
-    - { role: user, tags: user }
-    - { role: ssh, tags: ssh }
 
-- name: Install application
+- hosts: all
   become: yes
   any_errors_fatal: yes
-  hosts: all
   roles:
+  - { role: user, tags: user }
+  - { role: ssh, tags: ssh }
+  - { role: updates, tags: updates }
   - { role: hostname, tags: hostname }
   - { role: node, tags: node }
   - { role: app, tags: app }
