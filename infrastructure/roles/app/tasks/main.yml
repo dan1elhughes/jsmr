@@ -1,5 +1,11 @@
 ---
 
+- name: Create folder for root SSH
+  file:
+    path="/root/.ssh"
+    state="directory"
+    mode="0700"
+
 - name: Copy deploy key (read only access)
   copy:
     src='id_rsa'
@@ -30,14 +36,3 @@
   npm:
     name: pm2
     global: yes
-
-- name: Start worker process
-  command: "pm2 start /opt/app/worker.js -i {{ ansible_processor_vcpus }}"
-  args:
-    chdir: "/opt/app"
-    creates: "/root/.pm2/pids/worker-0.pid"
-
-- name: Enable PM2 at boot
-  command: "pm2 startup systemd -u root --hp /root"
-  args:
-    creates: "/etc/systemd/system/pm2-root.service"
