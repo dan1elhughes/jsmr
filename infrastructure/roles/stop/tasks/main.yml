@@ -1,0 +1,6 @@
+---
+
+- name: Stop any running worker process
+  command: "pm2 delete all"
+  args:
+    chdir: "/opt/app"
