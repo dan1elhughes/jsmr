@@ -179,100 +179,114 @@ let map = components => {
 
 };
 
-let getRemoteValue = (host, key) => new Promise(resolve => {
-	if (host.address === MY_IP && host.port === serverMeta.port) {
-		resolve(memory.filter(item => item.key === key));
-	} else {
-		log(`GRMV`, `Requesting ${key} from ${host.address}:${host.port}`);
+let socketPool = {};
+let connectToPeer = uri => new Promise(resolve => {
+	if (socketPool[uri]) {
+		// log(`P2P `, `Reusing connection to ${uri}`);
+		return resolve(socketPool[uri]);
+	}
 
-		let p2psocket = network.connect(`http://${host.address}:${host.port}`, {
+	socketPool[uri] = new Promise(resolve => {
+		log(`P2P `, `Initialising connection to ${uri}`);
+
+		let socket = network.connect(uri, {
 			reconnect: true,
 			timeout: 1000,
 		});
-		p2psocket.io.backoff.factor = 1;
-		p2psocket.io.backoff.jitter = 0;
-		p2psocket.io.backoff.ms = 0;
 
-		p2psocket.on('reconnect_attempt', (n) => {
-			// BUG These sockets remain alive and trying to connect. Store map of connections and re-use
-			log(`CONN`, `Connecting to ${host.address}:${host.port} (Retry ${n})`);
-			if (n > 100) {
-				log(`ERR!`, `Failed to connect to ${host.address}:${host.port}`);
-				p2psocket.disconnect();
-			}
-		});
+		socket.io.backoff.factor = 1;
+		socket.io.backoff.jitter = 0;
+		socket.io.backoff.ms = 0;
 
-		p2psocket.emit('kvs-get', key, value => {
-			log(`GRMV`, `Got ${key} from ${host.address}:${host.port}`);
-			p2psocket.disconnect();
-			return resolve(value);
+		socket.on('reconnect_attempt', n => log(`CONN`, `Connecting to ${uri} (Retry ${n})`));
+
+		socket.on('connect', () => {
+			socket.emit('_ping', response => {
+				if (response === '_pong') {
+					resolve(socket);
+				}
+			})
 		});
-	}
+	});
+
+	return resolve(socketPool[uri]);
 });
 
-// POSSIBLE BUG:
-// If one node finishes before another and requests
-// a find on a key, it won't get map results for
-// the second node. Fix may be to wait for all
-// maps to finish before sending out any reduce
-// instructions, or change shuffle to a push model.
-let getRemoteValues = ({ key, hosts }) => Promise.all(
-	hosts.map(
-		host => getRemoteValue(host, key)
-	)
-);
+let getRemoteValues = data => new Promise(resolve => {
+	let keys = {};
 
-let firstReduce = true;
-let reduce = components => {
+	data.forEach(item => {
+		item.hosts.forEach(host => {
+			let uri = `http://${host.address}:${host.port}`;
 
-	if (firstReduce) {
-		resetScaling();
-		firstReduce = false;
-	}
+			if (!keys[uri]) {
+				keys[uri] = [];
+			}
 
-	log('RDCE', `Got ${components.data.length} keys`);
-	let { data, fn } = components;
+			keys[uri].push(item.key);
+		});
+	});
 
 	let results = [];
 
-	let start = new Date();
+	for (let host in keys) {
+		if (host === serverMeta.uri) {
+			results.push(Promise.resolve(memory.filter(item => keys[host].indexOf(item.key) > -1)));
+			continue;
+		}
 
-	data.forEach((chunk, i) => {
-		let output = () => {
-
-			let { key, hosts } = chunk;
-
-			getRemoteValues({ key, hosts }).then(values => {
-				values = [].concat.apply([], values); // Converts a nested array into a flat array
-
-				let value = processInVM(fn, values);
-				results.push({ key, value });
-
-				log('RDCE', `${i+1} of ${components.data.length} (${key} => ${value})`, REWRITEABLE);
-
-				if (results.length === data.length) {
-
-					log(CLEAR);
-
-					socket.emit('result', { action: 'reduce', results });
-					socket.emit(`get-chunk`, CHUNKSIZE, store);
-
-					// BUG: Scale this properly
-					let timeTaken = new Date() - start;
-
-					if (timeTaken > IDEAL_TIME) {
-						decreaseScaling();
-					} else {
-						increaseScaling();
-					}
-				}
+		results.push(new Promise(resolve => {
+			connectToPeer(host).then((socket) => {
+				log(`KSVR`, `Requesting ${keys[host].join(',')} from ${host}`);
+				socket.emit('kvs-get', keys[host], (values) => {
+					resolve(values);
+				});
 			});
-		};
+		}));
+	}
+
+	return resolve(Promise.all(results));
+});
+
+let reduce = components => {
+
+	log('RDCE', `Got ${components.data.length} keys (${components.data.map(_ => _.key).join(',')})`);
+	let { data, fn } = components;
+
+	getRemoteValues(data).then(values => {
+		values = [].concat.apply([], values); // Converts a nested array into a flat array
+
+		let sets = {};
+
+		values.forEach(entry => {
+			if (!sets[entry.key]) {
+				sets[entry.key] = []
+			}
+
+			sets[entry.key].push(entry)
+		});
+
+		let results = [];
+		let i = 0;
+
+		for (let key in sets) {
+			let value = processInVM(fn, sets[key]);
+
+			results.push({ key, value });
+
+			log('RDCE', `${++i} of ${Object.keys(sets).length} (${key} => ${value})`, REWRITEABLE);
+		}
+
+		let done = () => {
+			log(CLEAR)
+			socket.emit('result', { action: 'reduce', results });
+			socket.emit(`get-chunk`, CHUNKSIZE, store);
+		}
 
 		if (components.debug.slow) {
-			setTimeout(output, components.debug.slow * i);
+			setTimeout(done, components.debug.slow * i);
 		} else {
-			output();
+			done();
 		}
 	});
 
@@ -298,19 +312,24 @@ socket.on('connect', () => {
 });
 
 p2p.on('connection', socket => {
-	socket.on('kvs-get', (key, respond) => {
-		let result = memory.filter(item => item.key === key);
-		log(`KSVG`, `Responding to request for ${key}: ${JSON.stringify(result)}`);
+
+	socket.on('_ping', respond => respond(`_pong`));
+
+	socket.on('kvs-get', (keys, respond) => {
+		let result = memory.filter(item => keys.indexOf(item.key) > -1);
+		log(`KSVG`, `Responding to request for ${JSON.stringify(keys)} (${result.length} values)`);
 		respond(result);
-		socket.disconnect();
 	});
+
 	socket.on('kvs-get-backup', (key, respond) => {
 		respond(backups.filter(item => item.key === key));
 	});
+
 });
 
 server.on('listening', () => {
 	serverMeta = server.address();
+	serverMeta.uri = `http://${MY_IP}:${serverMeta.port}`;
 
 	socket.emit('p2p-register', {
 		address: MY_IP,
