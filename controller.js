@@ -19,6 +19,8 @@ let mapQueue = new Queue();
 let reduceQueue = new Queue();
 let results = [];
 
+let startTime = new Date();
+
 app.load().on('data', chunk => {
 	let data = app.transform ? app.transform(chunk) : chunk;
 	mapQueue.concat(data);
@@ -94,6 +96,7 @@ network.on('connection', socket => {
 
 				app.write(output).then(() => {
 					console.log('Written');
+					console.log((new Date() - startTime) / 1000);
 					// process.exit(0);
 				});
 			}
