@@ -28,12 +28,11 @@
 
 - name: Start worker process
   command: "pm2 start /opt/app/worker.js -i {{ ansible_processor_vcpus }}"
-  become_user: "{{ user }}"
   args:
     chdir: "/opt/app"
-    creates: "/home/{{ user }}/.pm2/pids/worker-0.pid"
+    creates: "/root/.pm2/pids/worker-0.pid"
 
 - name: Enable PM2 at boot
-  command: "pm2 startup systemd -u {{ user }} --hp /home/{{ user }}"
+  command: "pm2 startup systemd -u root --hp /root"
   args:
-    creates: "/etc/systemd/system/pm2-{{ user }}.service"
+    creates: "/etc/systemd/system/pm2-root.service"
