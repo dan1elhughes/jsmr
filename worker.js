@@ -27,9 +27,9 @@ socket.on('reconnect_attempt', (n) => {
 
 let serverMeta;
 
-let memory = [];
+let memory = new Map();
 let backups = [];
-let resetMemory = () => memory = [];
+let resetMemory = () => memory = new Map();
 let resetBackups = () => backups = [];
 
 let CHUNKSIZE = 1;
@@ -134,25 +134,26 @@ let map = components => {
 
 	if (combine) {
 		results.forEach(result => {
-			let existingResults = [];
-			memory = memory.filter(item => {
-				if (item.key === result.key) {
-					existingResults.push(item);
-					return false;
-				} else {
-					return true;
-				}
-			});
 
-			let arr = existingResults.concat(result);
-			let value = processInVM(combine, arr);
-			memory.push({
+			let existing = memory.get(result.key) || [];
+
+			let arr = existing.concat(result.value);
+
+			let toCombine = arr.map(value => ({
 				key: result.key,
-				value
-			});
+				value: value
+			}));
+
+			let combined = processInVM(combine, toCombine);
+
+			memory.set(result.key, [ combined ]);
 		});
 	} else {
-		memory = memory.concat(results);
+		results.forEach(result => {
+			let existing = memory.get(result.key) || [];
+			existing.push(result.value);
+			memory.set(result.key, existing);
+		});
 	}
 
 	log(CLEAR); // Blank line to indicate map has finished
@@ -237,7 +238,14 @@ let getRemoteValues = data => new Promise(resolve => {
 
 	for (let host in keys) {
 		if (host === serverMeta.uri) {
-			results.push(Promise.resolve(memory.filter(item => keys[host].indexOf(item.key) > -1)));
+			keys[host].forEach(key => {
+				let known = memory.get(key);
+
+				known.forEach(value => {
+					results.push(Promise.resolve({ key, value }));
+				})
+			});
+
 			continue;
 		}
 
@@ -265,6 +273,7 @@ let reduce = components => {
 		let sets = {};
 
 		values.forEach(entry => {
+
 			if (!sets[entry.key]) {
 				sets[entry.key] = []
 			}
@@ -284,7 +293,6 @@ let reduce = components => {
 		}
 
 		let done = () => {
-			log(CLEAR)
 			socket.emit('result', { action: 'reduce', results });
 			socket.emit(`get-chunk`, CHUNKSIZE, store);
 		}
@@ -322,7 +330,16 @@ p2p.on('connection', socket => {
 	socket.on('_ping', respond => respond(`_pong`));
 
 	socket.on('kvs-get', (keys, respond) => {
-		let result = memory.filter(item => keys.indexOf(item.key) > -1);
+		let result = [];
+
+		keys.forEach(key => {
+			let known = memory.get(key);
+
+			known.forEach(value => {
+				result.push({ key, value });
+			})
+		});
+
 		log(`KSVG`, `Responding to request for ${JSON.stringify(keys)} (${result.length} values)`);
 		respond(result);
 	});
