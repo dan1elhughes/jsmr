@@ -6,6 +6,11 @@
     dest='/root/.ssh/id_rsa'
     mode='0600'
 
+- name: Install git
+  apt:
+    name: git
+    state: latest
+
 - name: Clone application
   git:
     repo: ssh://git@github.com/dan1elhughes/fyp.git
