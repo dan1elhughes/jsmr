@@ -196,6 +196,10 @@ let getRemoteValue = (host, key) => new Promise(resolve => {
 		p2psocket.on('reconnect_attempt', (n) => {
 			// BUG These sockets remain alive and trying to connect. Store map of connections and re-use
 			log(`CONN`, `Connecting to ${host.address}:${host.port} (Retry ${n})`);
+			if (n > 100) {
+				log(`ERR!`, `Failed to connect to ${host.address}:${host.port}`);
+				p2psocket.disconnect();
+			}
 		});
 
 		p2psocket.emit('kvs-get', key, value => {
