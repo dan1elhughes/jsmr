@@ -55,7 +55,9 @@ module.exports = function () {
 	 */
 	this.hasKey = id => key => {
 		if (id && key && this.hosts[id]) {
-			this.hosts[id].keys.push(key);
+			if (this.hosts[id].keys.indexOf(key) === -1) {
+				this.hosts[id].keys.push(key);
+			}
 		}
 	};
 
