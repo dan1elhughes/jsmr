@@ -22,13 +22,15 @@ module.exports = function (data) {
 	 * Pops the first item off the queue and removes all other items with the same key.
 	 * @return {String} A single key
 	 */
-	this.accumulate = () => {
-		let key, first = this.pop()[0];
-		if (first) {
-			key = first.key;
+	this.accumulate = (priority) => {
+		let key;
 
-			this.queue.forEach((element, i) => {
-				if (element.key === key) {
+		if (this.length() > 0) {
+
+			key = priority || this.queue[0].key;
+
+			this.queue.forEach((item, i) => {
+				if (item.key === key) {
 					this.pull(i);
 				}
 			});

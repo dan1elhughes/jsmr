@@ -45,14 +45,33 @@ module.exports = (components) => (quantity, respond) => {
 		let i = timings[socket].count;
 
 		while (i-- > 0) {
-			let key = reduceQueue.accumulate();
+			let key;
+
+			for (var j = 0; j < reduceQueue.length(); j++) {
+				let item = reduceQueue.queue[j];
+
+				p2p.hosts[socket].keys.forEach(k => {
+					if (item.key === k) {
+						key = reduceQueue.accumulate(k);
+					}
+				});
+
+				if (key) {
+					break;
+				}
+			}
+
+			key = key || reduceQueue.accumulate();
+
 			if (key) {
 				data.push({
 					key,
 					hosts: p2p.findHostsWith(key)
 				});
 			}
+
 		}
+
 		action = 'reduce';
 
 	} else {
