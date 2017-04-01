@@ -31,9 +31,6 @@ module.exports = (components) => (quantity, respond) => {
 		fn = reduce.toString();
 		data = [];
 
-		console.log(socket);
-		console.log(timings[socket]);
-
 		if (!timings[socket]) {
 			// Node connected after Map phase finished
 			timings[socket] = {
@@ -53,22 +50,30 @@ module.exports = (components) => (quantity, respond) => {
 
 		timings[socket].time = new Date();
 
-		let i = timings[socket].count;
+		let count = timings[socket].count;
 
-		while (i-- > 0) {
+		while (count-- > 0) {
 			let key;
 
 			for (var j = 0; j < reduceQueue.length(); j++) {
 				let item = reduceQueue.queue[j];
 
-				p2p.hosts[socket].keys.forEach(k => {
-					if (item.key === k) {
-						key = reduceQueue.accumulate(k);
-					}
-				});
+				if (p2p.hosts[socket]) {
+					for (var k = 0; k < p2p.hosts[socket].keys.length; k++) {
+						if (key) {
+							continue;
+						}
 
-				if (key) {
-					break;
+						let ky = p2p.hosts[socket].keys[k];
+
+						if (item.key === ky) {
+							key = reduceQueue.accumulate(ky);
+						}
+					}
+
+					if (key) {
+						break;
+					}
 				}
 			}
 
