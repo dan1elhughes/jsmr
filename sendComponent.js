@@ -31,6 +31,17 @@ module.exports = (components) => (quantity, respond) => {
 		fn = reduce.toString();
 		data = [];
 
+		console.log(socket);
+		console.log(timings[socket]);
+
+		if (!timings[socket]) {
+			// Node connected after Map phase finished
+			timings[socket] = {
+				time: new Date(),
+				count: 1
+			};
+		}
+
 		let last = timings[socket].time;
 		let now = new Date();
 
