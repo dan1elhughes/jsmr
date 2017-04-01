@@ -1,5 +1,10 @@
 ---
 
+- name: Stop any running worker process
+  command: "pm2 delete all"
+  args:
+    chdir: "/opt/app"
+
 - name: Start worker process
   command: "pm2 start /opt/app/worker.js -i {{ ansible_processor_vcpus }}"
   args:
