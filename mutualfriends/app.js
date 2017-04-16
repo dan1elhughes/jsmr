@@ -5,6 +5,8 @@ module.exports = {
 		print: true
 	},
 
+	ideal_time: 500,
+
 	load: () => fs.createReadStream('mutualfriends/input.csv', {
 		encoding: 'UTF-8'
 	}),
@@ -16,7 +18,7 @@ module.exports = {
 		.map(data => ({ person: data[0], friends: data[1].split("|") })),
 
 	map: ({ person, friends }) => friends.map(friend => ({
-		key: [person, friend].sort().join(','),
+		key: [person, friend].sort().join('|'),
 		value: friends,
 	})),
 
@@ -34,11 +36,18 @@ module.exports = {
 		};
 
 		let values = collection.map(_ => _.value);
-		let intersection = intersect(values[0], values[1]).join(",");
+		let intersection = intersect(values[0], values[1]).join("|");
 		return intersection;
 	},
 
+	filter: item => {
+		let mutuals = item.value.split("|");
+		return mutuals[0] !==  "" && mutuals.length > 0;
+	},
+
+	aggregate: collection => collection.sort((a, b) => b.value.length - a.value.length),
+
 	write: result => new Promise(resolve => {
-		fs.writeFile('./output/mutualfriends.json', JSON.stringify(result, null, '\t'), 'utf8', resolve);
+		fs.writeFile('./output/mutualfriends.csv', result.map(_ => `${_.key},${_.value}`).join("\n"), 'utf8', resolve);
 	})
 };
