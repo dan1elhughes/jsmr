@@ -35,6 +35,6 @@ module.exports = {
 		.sort((a, b) => b.value - a.value),
 
 	write: result => new Promise(resolve => {
-		fs.writeFile('./output/output.json', JSON.stringify(result, null, '\t'), 'utf8', resolve);
+		fs.writeFile('./output/wordcount.json', JSON.stringify(result, null, '\t'), 'utf8', resolve);
 	})
 };
