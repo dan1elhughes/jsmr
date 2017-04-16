@@ -3,7 +3,7 @@ const fs = require('fs');
 module.exports = {
 	debug: {
 		print: true,
-		// slow: 500
+		// slow: 200
 	},
 
 	// huge.txt: 114,242 words
@@ -25,9 +25,9 @@ module.exports = {
 
 	map: word => ({ key: word, value: 1 }),
 
-	reduce: collection => collection.reduce((sum, word) => sum + word.value, 0),
-
 	combine: collection => collection.reduce((sum, word) => sum + word.value, 0),
+
+	reduce: collection => collection.reduce((sum, word) => sum + word.value, 0),
 
 	filter: word => word.value > 1,
 

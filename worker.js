@@ -289,7 +289,7 @@ let reduce = components => {
 
 			results.push({ key, value });
 
-			log('RDCE', `${++i} of ${Object.keys(sets).length} (${key} => ${value})`, REWRITEABLE);
+			log('RDCE', `${++i} of ${Object.keys(sets).length} (${key} => ${JSON.stringify(value)})`, REWRITEABLE);
 		}
 
 		let done = () => {
