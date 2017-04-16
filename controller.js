@@ -1,15 +1,23 @@
+// Load environment variables
+require('dotenv').config();
+const application = process.env.APP || 'wordcount';
+
 const server = require('http').createServer();
 const network = require('socket.io').listen(server);
 const console = require('util');
 const sendComponent = require('./sendComponent');
-const app = require('./wordcount/app');
 const Queue = require('./Queue');
 const P2P = require('./p2p');
-const dotenv = require('dotenv');
 const { print, CLEAR, REWRITEABLE } = require('./debug');
 
-// Load environment variables
-dotenv.config();
+let app;
+try {
+	app = require(`./${application}/app`);
+} catch (e) {
+	console.log(`INIT: application { /${application}/app.js } not found`);
+	process.exit(1);
+}
+console.log(`INIT: application { /${application}/app.js }`);
 
 let port = process.env.CONTROLLER_PORT || 33000;
 
