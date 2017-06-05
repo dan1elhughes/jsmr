@@ -10,6 +10,9 @@ output/*
 # Environment variables
 .env
 
+# Secrets
+/infrastructure/group_vars/all/secrets.yml
+
 #### Stock .gitignore follows ####
 
 # Logs

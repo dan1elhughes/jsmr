@@ -2,3 +2,4 @@
 user: "pi"
 crypted_password: "{{ 'raspberry' | password_hash('sha512') }}"
 ansible_sudo_pass: "raspberry"
+pushbullet_api_key: "{{ SECRET_pushbullet_api_key }}"

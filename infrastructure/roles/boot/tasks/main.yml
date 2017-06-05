@@ -1,0 +1,6 @@
+---
+
+- name: Install Pushbullet script
+  template:
+    src='rc.local.j2'
+    dest='/etc/rc.local'

@@ -18,6 +18,7 @@
   - { role: user, tags: user }
   - { role: ssh, tags: ssh }
   - { role: updates, tags: updates }
+  - { role: boot, tags: boot }
   - { role: hostname, tags: hostname }
   - { role: node, tags: node }
   - { role: app, tags: app }
