@@ -3,7 +3,7 @@
 - name: Prerequisite Python installation
   become: yes
   any_errors_fatal: yes
-  hosts: all
+  hosts: active
   gather_facts: no
   tags: pre
   pre_tasks:
@@ -11,7 +11,7 @@
        changed_when: false
        raw: sudo apt-get -y install python-minimal
 
-- hosts: all
+- hosts: active
   become: yes
   any_errors_fatal: yes
   roles:
