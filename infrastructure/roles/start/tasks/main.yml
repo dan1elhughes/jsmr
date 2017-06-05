@@ -1,5 +1,10 @@
 ---
 
+- name: Copy environment file
+  copy:
+    src='/vagrant/.env'
+    dest='/opt/app/.env'
+
 - name: Start worker process
   command: "pm2 start /opt/app/worker.js -i {{ threads }}"
   args:

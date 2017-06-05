@@ -23,11 +23,6 @@
     dest: /opt/app
     accept_hostkey: True
 
-- name: Copy environment file
-  copy:
-    src='/vagrant/.env'
-    dest='/opt/app/.env'
-
 - name: Install packages
   npm:
     path: /opt/app
