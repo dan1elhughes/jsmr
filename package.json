@@ -1,10 +1,10 @@
 {
-  "name": "fyp",
+  "name": "JSMR",
   "version": "0.0.1",
-  "description": "Final year project",
+  "description": "JavaScript MapReduce system",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dan1elhughes/fyp.git"
+    "url": "git+https://github.com/dan1elhughes/JSMR.git"
   },
   "scripts": {
     "test": "mocha tests",
@@ -12,11 +12,10 @@
     "worker": "nodemon worker.js"
   },
   "author": "Dan Hughes",
-  "license": "ISC",
   "bugs": {
-    "url": "https://github.com/dan1elhughes/fyp/issues"
+    "url": "https://github.com/dan1elhughes/JSMR/issues"
   },
-  "homepage": "https://github.com/dan1elhughes/fyp#readme",
+  "homepage": "https://github.com/dan1elhughes/JSMR#readme",
   "dependencies": {
     "dotenv": "^4.0.0",
     "single-line-log": "^1.1.2",
