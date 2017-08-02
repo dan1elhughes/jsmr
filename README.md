@@ -95,6 +95,20 @@ Takes the aggregated result, and should return a promise that resolves when the 
 	- For a worker: `CONTROLLER_IP=1.2.3.4` where `1.2.3.4` is the IP address of the controller to connect to.
 	- For a controller: `APP=wordcount` where `wordcount` is the name of the application to run.
 
+## Behind the scenes
+
+### Overview
+
+![](charts/4d03ef870e2a24db149f7c88e68168ae.png)
+
+### Map phase
+
+![](charts/badd50be3170ab90ab5281f28300c2c1.png)
+
+### Reduce phase
+
+![](charts/3ac82da55ed078685f94b6d7ddd2604d.png)
+
 ## Next steps
 
 - Browser-based client access to add resources by visiting a URL
