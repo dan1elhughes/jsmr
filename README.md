@@ -24,7 +24,7 @@ module.exports = {
 	transform: content => content
 		.split(/\n| /)
 		.map(word => word.trim().replace(/\W/g, '').toLowerCase())
-		.filter(word => word !== ''), // Remove any empty words (i.e. just symbols)
+		.filter(word => word !== ''),
 
 	// Count one for each word encountered.
 	map: word => ({ key: word, value: 1 }),
