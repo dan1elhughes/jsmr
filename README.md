@@ -94,6 +94,7 @@ Takes the aggregated result, and should return a promise that resolves when the 
 - Create a `.env` file with the following properties:
 	- For a worker: `CONTROLLER_IP=1.2.3.4` where `1.2.3.4` is the IP address of the controller to connect to.
 	- For a controller: `APP=wordcount` where `wordcount` is the name of the application to run.
+- Run `node controller.js` or `node worker.js` depending on the role the machine should take.
 
 ## Behind the scenes
 
