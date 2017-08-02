@@ -8,6 +8,15 @@ JSMR is a JavaScript system for processing big data on distributed systems. It a
 * **Scalable:** Each worker contains its own load balancer, to request the correct amount of data for its own processing capability. More powerful machines will scale up faster to process data faster as the application runs.
 * **Simple:** In comparison to other solutions, JSMR only needs Node installed. The entire stack from communication to data storage is written in JavaScript.
 
+## Installation
+
+- Clone this repository onto each machine
+- Run `npm install`
+- Create a `.env` file with the following properties:
+	- For a worker: `CONTROLLER_IP=1.2.3.4` where `1.2.3.4` is the IP address of the controller to connect to.
+	- For a controller: `APP=wordcount` where `wordcount` is the name of the application to run.
+- Run `node controller.js` or `node worker.js` depending on the role the machine should take.
+
 ## Examples
 
 This example runs a simple wordcount. This code is bundled with the application; to run it, set the `APP` environment variable to `wordcount`.
@@ -86,15 +95,6 @@ Takes the aggregated result, and should return a promise that resolves when the 
 - `debug.print`: A Boolean describing whether the worker nodes should print a log of their processing status and intercommunications. Outputting text to the console can be a slow operation in Node.
 
 - `debug.slow`: A number in milliseconds, which controls the time delay between each operation. This can be useful for developing algorithms to view each step taken in realtime.
-
-## Installation
-
-- Clone this repository onto each machine
-- Run `npm install`
-- Create a `.env` file with the following properties:
-	- For a worker: `CONTROLLER_IP=1.2.3.4` where `1.2.3.4` is the IP address of the controller to connect to.
-	- For a controller: `APP=wordcount` where `wordcount` is the name of the application to run.
-- Run `node controller.js` or `node worker.js` depending on the role the machine should take.
 
 ## Behind the scenes
 
